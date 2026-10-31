@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{
   box-sizing:border-box;
@@ -205,7 +204,7 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
         <p class="hint" id="dataHint"></p>
         <button class="btn" id="dataGo" hidden>Restore this backup</button>
       </div>
-      <button class="btn ghost" id="logout" hidden>Log out</button>
+      <button class="btn ghost" id="logout">Connect to GitHub</button>
     </section>
   </div>
 
@@ -222,12 +221,11 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
 <div class="login" id="login" hidden>
   <section>
     <h1>Gym log</h1>
-    <p class="hint">Log in to see your sessions and weights on every device.</p>
-    <label class="field" for="em">Email</label>
-    <input class="inp" id="em" type="email" autocomplete="email">
-    <label class="field" for="pw">Password</label>
-    <input class="inp" id="pw" type="password" autocomplete="current-password">
-    <button class="btn" id="loginBtn">Log in</button>
+    <p class="hint">Paste your GitHub key to save everything to your gym_data repository. You only do this once on each device.</p>
+    <label class="field" for="tok">GitHub key</label>
+    <input class="inp" id="tok" type="password" autocomplete="off" placeholder="github_pat_…">
+    <button class="btn" id="loginBtn">Connect</button>
+    <button class="btn ghost" id="skipBtn" style="margin-top:10px">Use without syncing</button>
     <div class="toast" id="loginMsg" role="status"></div>
   </section>
 </div>
@@ -587,13 +585,19 @@ function openDetail(id){
   window.scrollTo(0,0);
 }
 
-/* ================= sync + backup ================= */
-// Paste your Supabase details here (Project Settings > API):
-const SUPABASE_URL = "PASTE_PROJECT_URL_HERE";
-const SUPABASE_KEY = "PASTE_ANON_KEY_HERE";
+/* ================= sync to GitHub ================= */
+// Everything is saved to data.json in this repository:
+const GH_OWNER = "manstar15";
+const GH_REPO  = "gym_data";
+const GH_FILE  = "data.json";
+const TOKEN_KEY = "gymlog.ghkey";
+const API = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
 
-let currentDetail = null, sb = null, user = null, saveTimer = null;
+let currentDetail = null, token = null, sha = null, saveTimer = null, busy = false;
 const status = t => document.getElementById("syncStatus").textContent = t;
+const now = () => new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+const enc = str => { const b = new TextEncoder().encode(str); let s = ""; b.forEach(c => s += String.fromCharCode(c)); return btoa(s); };
+const dec = b64 => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\n/g,"")), c => c.charCodeAt(0)));
 
 function rerender(){
   render();
@@ -611,55 +615,122 @@ function merge(a, b){
   }
   return { entries: [...E.values()], lifts: L };
 }
+async function gh(method, body){
+  return fetch(API, {
+    method, cache: "no-store",
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+    body: body ? JSON.stringify(body) : undefined
+  });
+}
+// read data.json -> {data, sha} | {data:null} when file doesn't exist yet
+async function readFile(){
+  const r = await gh("GET");
+  if (r.status === 404){
+    // file missing, or repo missing / key can't see it
+    const repo = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!repo.ok) throw { code: "repo" };
+    return { data: null, sha: null };
+  }
+  if (r.status === 401 || r.status === 403) throw { code: "key" };
+  if (!r.ok) throw { code: "net" };
+  const j = await r.json();
+  return { data: JSON.parse(dec(j.content)), sha: j.sha };
+}
+async function writeFile(){
+  const r = await gh("PUT", { message: `Gym log update ${iso(new Date())}`, content: enc(JSON.stringify({ entries, lifts }, null, 1)), ...(sha ? { sha } : {}) });
+  if (r.status === 409 || r.status === 422){
+    // changed on another device since we last read it: combine both and try again
+    const f = await readFile(); sha = f.sha;
+    if (f.data){ const m = merge(f.data, { entries, lifts }); entries = m.entries; lifts = m.lifts; put(KEY, entries); put(LKEY, lifts); rerender(); }
+    const r2 = await gh("PUT", { message: `Gym log update ${iso(new Date())}`, content: enc(JSON.stringify({ entries, lifts }, null, 1)), ...(sha ? { sha } : {}) });
+    if (!r2.ok) throw { code: "net" };
+    sha = (await r2.json()).content.sha; return;
+  }
+  if (r.status === 401 || r.status === 403) throw { code: "key" };
+  if (!r.ok) throw { code: "net" };
+  sha = (await r.json()).content.sha;
+}
+function fail(e){
+  status(e && e.code === "key" ? "Your GitHub key stopped working. Tap Connect to GitHub and paste a new one."
+       : "Couldn’t reach GitHub. Your changes are saved on this device and will sync next time.");
+}
 function saveAll(){
   put(KEY, entries); put(LKEY, lifts);
-  if (!user) return;
+  if (!token) return;
   status("Saving…");
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(push, 600);
+  saveTimer = setTimeout(push, 1200);
 }
 async function push(){
-  const { error } = await sb.from("gym_data").upsert({ user_id: user.id, data: { entries, lifts }, updated_at: new Date().toISOString() });
-  saveTimer = null;
-  status(error ? "Couldn’t sync. Your changes are saved on this device and will sync next time." : `Synced across your devices at ${new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}.`);
+  if (busy){ saveTimer = setTimeout(push, 800); return; }
+  busy = true;
+  try { await writeFile(); status(`Saved to GitHub at ${now()}.`); }
+  catch(e){ fail(e); }
+  busy = false; saveTimer = null;
 }
 async function pull(first){
-  const { data, error } = await sb.from("gym_data").select("data").eq("user_id", user.id).maybeSingle();
-  if (error){ status("Couldn’t reach sync. Showing what’s saved on this device."); return; }
-  const cloud = data ? data.data : { entries: [], lifts: {} };
-  const next = first ? merge(cloud, { entries, lifts }) : cloud;
-  entries = next.entries || []; lifts = next.lifts || {};
-  put(KEY, entries); put(LKEY, lifts);
-  rerender();
-  if (first) await push(); else status(`Synced across your devices at ${new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}.`);
+  if (busy) return;
+  busy = true;
+  try {
+    const f = await readFile();
+    sha = f.sha;
+    const cloud = f.data || { entries: [], lifts: {} };
+    const next = first ? merge(cloud, { entries, lifts }) : cloud;
+    const changed = JSON.stringify(next) !== JSON.stringify(cloud);
+    entries = next.entries || []; lifts = next.lifts || {};
+    put(KEY, entries); put(LKEY, lifts);
+    rerender();
+    if (first && (changed || !f.data)) await writeFile();
+    status(`Synced with GitHub at ${now()}.`);
+  } catch(e){ busy = false; throw e; }
+  busy = false;
 }
-async function initCloud(){
-  if (!SUPABASE_URL.startsWith("https://") || !window.supabase) return;
-  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const { data: { session } } = await sb.auth.getSession();
-  if (session){ user = session.user; afterLogin(); } else document.getElementById("login").hidden = false;
+function setConnected(on){
+  document.getElementById("logout").textContent = on ? "Disconnect this device" : "Connect to GitHub";
+  if (!on) status("Saved on this device only.");
 }
-function afterLogin(){
-  document.getElementById("login").hidden = true;
-  document.getElementById("logout").hidden = false;
-  pull(true);
+async function connect(t, fromSetup){
+  token = t;
+  try {
+    await pull(true);
+    try { localStorage.setItem(TOKEN_KEY, t); } catch(e){}
+    document.getElementById("login").hidden = true;
+    setConnected(true);
+  } catch(e){
+    token = null;
+    if (!fromSetup){ fail(e); return; }
+    const msg = document.getElementById("loginMsg");
+    msg.className = "toast err";
+    msg.textContent = e.code === "key" ? "That key didn’t work. Copy it again from GitHub and paste the whole thing."
+                    : e.code === "repo" ? `Can’t find the ${GH_REPO} repository. Check it exists and that the key has access to it.`
+                    : "Couldn’t reach GitHub. Check your internet and try again.";
+  }
 }
-document.getElementById("loginBtn").addEventListener("click", async () => {
+function initSync(){
+  let t = null; try { t = localStorage.getItem(TOKEN_KEY); } catch(e){}
+  if (t) connect(t, false).then(() => { if (!token){ token = t; setConnected(true); } });
+  else document.getElementById("login").hidden = false;
+}
+document.getElementById("loginBtn").addEventListener("click", () => {
+  const t = document.getElementById("tok").value.trim();
   const msg = document.getElementById("loginMsg");
-  msg.className = "toast"; msg.textContent = "Logging in…";
-  const { data, error } = await sb.auth.signInWithPassword({ email: document.getElementById("em").value.trim(), password: document.getElementById("pw").value });
-  if (error){ msg.className = "toast err"; msg.textContent = "Wrong email or password. Check them and try again."; return; }
-  msg.textContent = ""; user = data.user; afterLogin();
+  if (!t){ msg.className = "toast err"; msg.textContent = "Paste your GitHub key first."; return; }
+  msg.className = "toast"; msg.textContent = "Connecting…";
+  connect(t, true);
 });
-document.getElementById("pw").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("loginBtn").click(); });
-document.getElementById("logout").addEventListener("click", async () => {
-  await sb.auth.signOut(); user = null;
-  document.getElementById("logout").hidden = true;
-  status("Saved on this device only.");
-  document.getElementById("login").hidden = false;
+document.getElementById("skipBtn").addEventListener("click", () => { document.getElementById("login").hidden = true; setConnected(false); });
+document.getElementById("logout").addEventListener("click", () => {
+  if (token){
+    token = null; sha = null;
+    try { localStorage.removeItem(TOKEN_KEY); } catch(e){}
+    setConnected(false);
+  } else {
+    document.getElementById("loginMsg").textContent = "";
+    document.getElementById("login").hidden = false;
+  }
 });
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible" && user && !saveTimer) pull(false);
+  if (document.visibilityState === "visible" && token && !saveTimer) pull(false).catch(fail);
 });
 
 // backup / restore
@@ -689,7 +760,7 @@ go.addEventListener("click", () => {
 });
 
 render();
-initCloud();
+initSync();
 </script>
 </body>
 </html>
