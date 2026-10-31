@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Gym log</title>
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
+<link rel="icon" type="image/png" href="apple-touch-icon.png?v=2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Gym log">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#E4E5E1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17191B" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -404,9 +412,9 @@ document.getElementById("save").addEventListener("click", () => {
   anchor = parse(dateInput.value);
   render();
 });
-document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+document.querySelectorAll("#tab-sessions .seg button").forEach(b => b.addEventListener("click", () => {
   view = b.dataset.v;
-  document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-selected", x === b));
+  document.querySelectorAll("#tab-sessions .seg button").forEach(x => x.setAttribute("aria-selected", x === b));
   render();
 }));
 document.getElementById("prev").addEventListener("click", () => step(-1));
@@ -974,6 +982,7 @@ go.addEventListener("click", () => {
 
 render();
 initSync();
+
 </script>
 </body>
 </html>
