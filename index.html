@@ -249,13 +249,13 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
 <script>
 /* ================= shared helpers ================= */
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const DOW = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const pad = n => String(n).padStart(2,"0");
 const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const parse = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y,m-1,d); };
-const weekStart = d => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay()+6)%7)); return x; };
+const weekStart = d => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - x.getDay()); return x; };
 const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
-const fmt = d => `${DOW[(d.getDay()+6)%7]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+const fmt = d => `${DOW[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
 const kg = n => String(Math.round(n*100)/100);
 function ago(s){
   const n = Math.round((parse(iso(new Date())) - parse(s)) / 864e5);
@@ -364,7 +364,7 @@ function render(){
     html = `<div class="week">` + DOW.map((d,i) => { const day = iso(addDays(s,i));
       return `<div class="day${day===today?" today":""}"><b>${d}</b><div class="bar">${stripes(map[day]||[])}</div></div>`; }).join("") + `</div>`;
   } else if (view === "month"){
-    const days = new Date(s.getFullYear(), s.getMonth()+1, 0).getDate(), offset = (s.getDay()+6)%7;
+    const days = new Date(s.getFullYear(), s.getMonth()+1, 0).getDate(), offset = s.getDay();
     html = `<div class="month">` + DOW.map(d => `<div class="dow">${d[0]}</div>`).join("");
     for (let i=0;i<offset;i++) html += `<div class="cell blank"></div>`;
     for (let d=1; d<=days; d++){ const t = map[iso(new Date(s.getFullYear(), s.getMonth(), d))]||[];
