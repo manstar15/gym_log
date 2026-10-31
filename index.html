@@ -176,6 +176,7 @@ li .tags{display:flex;gap:6px}
 .legend i.dotk{width:9px;height:9px;border:0;border-radius:50%;background:var(--c);opacity:.5}
 .bwrow{display:grid;grid-template-columns:1fr auto auto;gap:4px 14px;align-items:center}
 .bwrow b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:1.25rem}
+.del.sure,.btn.ghost.sure{background:var(--down);color:#fff;border-color:var(--down)}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;resize:vertical}
@@ -236,6 +237,17 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
         <button class="btn" id="dataGo" hidden>Restore this backup</button>
       </div>
       <button class="btn ghost" id="logout">Connect to GitHub</button>
+      <p class="hint" id="codeLine" style="margin:16px 0 10px"></p>
+      <div class="row2">
+        <button class="btn ghost" id="switchBtn">Switch code</button>
+        <button class="btn ghost" id="inviteBtn">Invite someone</button>
+      </div>
+      <div id="inviteBox" hidden>
+        <label class="field" for="inviteCode">Their code</label>
+        <select class="inp" id="inviteCode"></select>
+        <textarea id="inviteLink" rows="3" readonly aria-label="Setup link"></textarea>
+        <p class="hint" id="inviteHint"></p>
+      </div>
     </section>
   </div>
 
@@ -295,7 +307,15 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
 </main>
 
 <div class="login" id="login" hidden>
-  <section>
+  <section id="codeStep" hidden>
+    <h1>Gym log</h1>
+    <p class="hint">Enter your personal code. It keeps your workouts and weights separate from everyone else’s.</p>
+    <label class="field" for="codeIn">Your code</label>
+    <input class="inp" id="codeIn" autocomplete="off" autocapitalize="characters" placeholder="e.g. IRON-1234">
+    <button class="btn" id="codeBtn">Continue</button>
+    <div class="toast" id="codeMsg" role="status"></div>
+  </section>
+  <section id="keyStep" hidden>
     <h1>Gym log</h1>
     <p class="hint">Paste your GitHub key to save everything to your gym_data repository. You only do this once on each device.</p>
     <label class="field" for="tok">GitHub key</label>
@@ -807,9 +827,21 @@ document.querySelector(`#bwKind button[data-k="${bwKind}"]`).click();
 // Everything is saved to data.json in this repository:
 const GH_OWNER = "manstar15";
 const GH_REPO  = "gym_data";
-const GH_FILE  = "data.json";
+// Each code saves to its own file in gym_data. Add more codes here any time.
+const CODES = {
+  "MANSTAR-15": "data.json",       // you (keeps your existing data)
+  "IRON-9156":  "iron-9156.json",
+  "CURL-4463":  "curl-4463.json",
+  "DELT-5741":  "delt-5741.json",
+  "LAT-4024":   "lat-4024.json",
+  "RACK-3061":  "rack-3061.json",
+  "PLATE-8433": "plate-8433.json",
+};
+const CODE_KEY = "gymlog.code";
+let myCode = null; try { myCode = localStorage.getItem(CODE_KEY); } catch(e){}
+if (!CODES[myCode]) myCode = null;
 const TOKEN_KEY = "gymlog.ghkey";
-const API = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
+const apiUrl = () => `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${CODES[myCode]}`;
 
 let currentDetail = null, token = null, sha = null, saveTimer = null, busy = false;
 const status = t => document.getElementById("syncStatus").textContent = t;
@@ -837,7 +869,7 @@ function merge(a, b){
   return { entries: [...E.values()], lifts: L, bw: B };
 }
 async function gh(method, body){
-  return fetch(API, {
+  return fetch(apiUrl(), {
     method, cache: "no-store",
     headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
     body: body ? JSON.stringify(body) : undefined
@@ -927,10 +959,80 @@ async function connect(t, fromSetup){
                     : "Couldn’t reach GitHub. Check your internet and try again.";
   }
 }
-function initSync(){
+function showStep(step){
+  document.getElementById("login").hidden = !step;
+  document.getElementById("codeStep").hidden = step !== "code";
+  document.getElementById("keyStep").hidden = step !== "key";
+  if (step === "code"){ document.getElementById("codeIn").value = ""; document.getElementById("codeMsg").textContent = ""; }
+  if (step === "key") document.getElementById("loginMsg").textContent = "";
+}
+function setCode(c){
+  if (myCode && c !== myCode){
+    // a different person: start this device fresh so data never mixes
+    entries = []; lifts = {}; bw = {}; sha = null;
+    put(KEY, entries); put(LKEY, lifts); put(BKEY, bw);
+  }
+  myCode = c;
+  try { localStorage.setItem(CODE_KEY, c); } catch(e){}
+  document.getElementById("codeLine").textContent = `Your code is ${c}.`;
+  rerender();
+}
+function startSync(){
   let t = null; try { t = localStorage.getItem(TOKEN_KEY); } catch(e){}
-  if (t) connect(t, false).then(() => { if (!token){ token = t; setConnected(true); } });
-  else document.getElementById("login").hidden = false;
+  if (t){ showStep(null); connect(t, false).then(() => { if (!token){ token = t; setConnected(true); } }); }
+  else showStep("key");
+}
+function initSync(){
+  // setup link: #setup=CODE~KEY
+  const m = location.hash.match(/^#setup=([A-Za-z0-9-]+)~([A-Za-z0-9_]+)$/);
+  if (m){
+    history.replaceState(null, "", location.pathname);
+    const c = m[1].toUpperCase();
+    if (CODES[c]){
+      setCode(c);
+      try { localStorage.setItem(TOKEN_KEY, m[2]); } catch(e){}
+    }
+  }
+  if (!myCode) return showStep("code");
+  document.getElementById("codeLine").textContent = `Your code is ${myCode}.`;
+  startSync();
+}
+document.getElementById("codeBtn").addEventListener("click", () => {
+  const c = document.getElementById("codeIn").value.trim().toUpperCase().replace(/\s+/g, "");
+  const msg = document.getElementById("codeMsg");
+  if (!CODES[c]){ msg.className = "toast err"; msg.textContent = "That code doesn’t exist. Check it with whoever gave it to you."; return; }
+  token = null; setCode(c); startSync();
+});
+document.getElementById("codeIn").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("codeBtn").click(); });
+document.getElementById("switchBtn").addEventListener("click", e => {
+  const b = e.currentTarget;
+  if (!b.classList.contains("sure")){
+    b.classList.add("sure");
+    b.textContent = token ? "Tap again to switch" : "Not synced! Tap again";
+    setTimeout(() => { if (b.isConnected){ b.classList.remove("sure"); b.textContent = "Switch code"; } }, 3000);
+    return;
+  }
+  b.classList.remove("sure"); b.textContent = "Switch code";
+  clearTimeout(saveTimer); saveTimer = null;
+  showStep("code");
+});
+document.getElementById("inviteBtn").addEventListener("click", () => {
+  const box = document.getElementById("inviteBox");
+  box.hidden = !box.hidden;
+  const sel = document.getElementById("inviteCode");
+  sel.innerHTML = Object.keys(CODES).filter(c => c !== myCode).map(c => `<option>${c}</option>`).join("");
+  makeInvite();
+});
+document.getElementById("inviteCode").addEventListener("change", makeInvite);
+async function makeInvite(){
+  const hint = document.getElementById("inviteHint"), out = document.getElementById("inviteLink");
+  let t = token; if (!t) try { t = localStorage.getItem(TOKEN_KEY); } catch(e){}
+  if (!t){ out.value = ""; hint.textContent = "Connect to GitHub on this device first, then you can make setup links."; return; }
+  const c = document.getElementById("inviteCode").value;
+  out.value = `${location.origin}${location.pathname}#setup=${c}~${t}`;
+  out.select();
+  try { await navigator.clipboard.writeText(out.value); hint.textContent = `Copied. Send it privately to the person whose code is ${c}. One tap sets everything up for them.`; }
+  catch(e){ hint.textContent = `Copy this link and send it privately to the person whose code is ${c}. One tap sets everything up for them.`; }
 }
 document.getElementById("loginBtn").addEventListener("click", () => {
   const t = document.getElementById("tok").value.trim();
@@ -939,15 +1041,14 @@ document.getElementById("loginBtn").addEventListener("click", () => {
   msg.className = "toast"; msg.textContent = "Connecting…";
   connect(t, true);
 });
-document.getElementById("skipBtn").addEventListener("click", () => { document.getElementById("login").hidden = true; setConnected(false); });
+document.getElementById("skipBtn").addEventListener("click", () => { showStep(null); setConnected(false); });
 document.getElementById("logout").addEventListener("click", () => {
   if (token){
     token = null; sha = null;
     try { localStorage.removeItem(TOKEN_KEY); } catch(e){}
     setConnected(false);
   } else {
-    document.getElementById("loginMsg").textContent = "";
-    document.getElementById("login").hidden = false;
+    showStep("key");
   }
 });
 document.addEventListener("visibilitychange", () => {
