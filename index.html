@@ -236,18 +236,8 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
         <p class="hint" id="dataHint"></p>
         <button class="btn" id="dataGo" hidden>Restore this backup</button>
       </div>
-      <button class="btn ghost" id="logout">Connect to GitHub</button>
-      <p class="hint" id="codeLine" style="margin:16px 0 10px"></p>
-      <div class="row2">
-        <button class="btn ghost" id="switchBtn">Switch code</button>
-        <button class="btn ghost" id="inviteBtn">Invite someone</button>
-      </div>
-      <div id="inviteBox" hidden>
-        <label class="field" for="inviteCode">Their code</label>
-        <select class="inp" id="inviteCode"></select>
-        <textarea id="inviteLink" rows="3" readonly aria-label="Setup link"></textarea>
-        <p class="hint" id="inviteHint"></p>
-      </div>
+      <p class="hint" id="codeLine" style="margin:6px 0 10px"></p>
+      <button class="btn ghost" id="logout">Log in</button>
     </section>
   </div>
 
@@ -307,22 +297,33 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
 </main>
 
 <div class="login" id="login" hidden>
-  <section id="codeStep" hidden>
+  <section id="pwStep" hidden>
     <h1>Gym log</h1>
-    <p class="hint">Enter your personal code. It keeps your workouts and weights separate from everyone else’s.</p>
-    <label class="field" for="codeIn">Your code</label>
-    <input class="inp" id="codeIn" autocomplete="off" autocapitalize="characters" placeholder="e.g. IRON-1234">
-    <button class="btn" id="codeBtn">Continue</button>
-    <div class="toast" id="codeMsg" role="status"></div>
+    <p class="hint">Enter your password. Every password has its own private log.</p>
+    <label class="field" for="pwIn">Password</label>
+    <input class="inp" id="pwIn" type="password" autocomplete="current-password" autocapitalize="none" placeholder="e.g. mango-river-tiger-4821">
+    <button class="btn" id="pwBtn">Log in</button>
+    <button class="btn ghost" id="skipBtn" style="margin-top:10px">Use without syncing</button>
+    <div class="toast" id="pwMsg" role="status"></div>
+    <button class="undo" id="ownerBtn" style="margin-top:14px;color:var(--muted)">Owner setup</button>
   </section>
-  <section id="keyStep" hidden>
-    <h1>Gym log</h1>
-    <p class="hint">Paste your GitHub key to save everything to your gym_data repository. You only do this once on each device.</p>
+  <section id="ownerStep" hidden>
+    <h1>Owner setup</h1>
+    <p class="hint">Make a password for each person. Your GitHub key gets locked inside every password, so nobody ever needs to see it.</p>
+    <p class="hint" id="existing"></p>
     <label class="field" for="tok">GitHub key</label>
     <input class="inp" id="tok" type="password" autocomplete="off" placeholder="github_pat_…">
-    <button class="btn" id="loginBtn">Connect</button>
-    <button class="btn ghost" id="skipBtn" style="margin-top:10px">Use without syncing</button>
-    <div class="toast" id="loginMsg" role="status"></div>
+    <label class="field" for="people">New people, one name per line</label>
+    <textarea id="people" rows="4"></textarea>
+    <button class="btn" id="genBtn">Make passwords</button>
+    <div class="toast" id="ownerMsg" role="status"></div>
+    <div id="ownerOut" hidden>
+      <ul id="pwList" style="margin:6px 0 10px"></ul>
+      <p class="hint">Write these down now. They can’t be shown again, so a lost password means making a new one.</p>
+      <button class="btn" id="dlBtn">Download new index.html</button>
+      <p class="hint" id="dlHint" style="margin-top:8px"></p>
+    </div>
+    <button class="btn ghost" id="ownerBack" style="margin-top:10px">Back</button>
   </section>
 </div>
 
@@ -827,22 +828,16 @@ document.querySelector(`#bwKind button[data-k="${bwKind}"]`).click();
 // Everything is saved to data.json in this repository:
 const GH_OWNER = "manstar15";
 const GH_REPO  = "gym_data";
-// Each code saves to its own file in gym_data. Add more codes here any time.
-const CODES = {
-  "MANSTAR-15": "data.json",       // you (keeps your existing data)
-  "IRON-9156":  "iron-9156.json",
-  "CURL-4463":  "curl-4463.json",
-  "DELT-5741":  "delt-5741.json",
-  "LAT-4024":   "lat-4024.json",
-  "RACK-3061":  "rack-3061.json",
-  "PLATE-8433": "plate-8433.json",
-};
-const CODE_KEY = "gymlog.code";
-let myCode = null; try { myCode = localStorage.getItem(CODE_KEY); } catch(e){}
-if (!CODES[myCode]) myCode = null;
-const TOKEN_KEY = "gymlog.ghkey";
-const apiUrl = () => `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${CODES[myCode]}`;
+const TOKEN_KEY = "gymlog.ghkey", FILE_KEY = "gymlog.file", NAME_KEY = "gymlog.name";
+const ls = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch(e){} };
 
+// One entry per person. Made by Owner setup: the GitHub key is locked inside each password.
+/*LOCKS-START*/const LOCKS = [];/*LOCKS-END*/
+
+let myFile = ls(FILE_KEY), myName = ls(NAME_KEY);
+if (!myFile && ls("gymlog.code") === "MANSTAR-15" && ls(TOKEN_KEY)){ myFile = "data.json"; myName = "Me"; }   // devices set up before passwords
+const apiUrl = () => `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${myFile}`;
 let currentDetail = null, token = null, sha = null, saveTimer = null, busy = false;
 const status = t => document.getElementById("syncStatus").textContent = t;
 const now = () => new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
@@ -904,7 +899,7 @@ async function writeFile(){
   sha = (await r.json()).content.sha;
 }
 function fail(e){
-  status(e && e.code === "key" ? "Your GitHub key stopped working. Tap Connect to GitHub and paste a new one."
+  status(e && e.code === "key" ? "Sync stopped working. Log out and log in again with your password."
        : "Couldn’t reach GitHub. Your changes are saved on this device and will sync next time.");
 }
 function saveAll(){
@@ -938,117 +933,145 @@ async function pull(first){
   } catch(e){ busy = false; throw e; }
   busy = false;
 }
-function setConnected(on){
-  document.getElementById("logout").textContent = on ? "Disconnect this device" : "Connect to GitHub";
-  if (!on) status("Saved on this device only.");
+/* ---- password lock (AES-GCM, key from password via PBKDF2) ---- */
+const b64of = buf => { let s = ""; new Uint8Array(buf).forEach(c => s += String.fromCharCode(c)); return btoa(s); };
+const bytes = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const normPw = pw => pw.toLowerCase().replace(/\s+/g, "");
+async function pwKey(pw, salt){
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(normPw(pw)), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 200000, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
 }
-async function connect(t, fromSetup){
-  token = t;
+async function lockSecret(pw, secret){
+  const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await pwKey(pw, salt), new TextEncoder().encode(secret));
+  return { salt: b64of(salt), iv: b64of(iv), data: b64of(ct) };
+}
+async function unlockSecret(pw, L){
   try {
-    await pull(true);
-    try { localStorage.setItem(TOKEN_KEY, t); } catch(e){}
-    document.getElementById("login").hidden = true;
-    setConnected(true);
-  } catch(e){
-    token = null;
-    if (!fromSetup){ fail(e); return; }
-    const msg = document.getElementById("loginMsg");
-    msg.className = "toast err";
-    msg.textContent = e.code === "key" ? "That key didn’t work. Copy it again from GitHub and paste the whole thing."
-                    : e.code === "repo" ? `Can’t find the ${GH_REPO} repository. Check it exists and that the key has access to it.`
-                    : "Couldn’t reach GitHub. Check your internet and try again.";
-  }
+    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: bytes(L.iv) }, await pwKey(pw, bytes(L.salt)), bytes(L.data));
+    return new TextDecoder().decode(pt);
+  } catch(e){ return null; }
 }
+const WORDS = "apple anchor arrow atlas badge beach berry blaze bloom brave brick cable camel candy cedar chalk cherry cliff cloud cobra comet coral crane crown delta dune eagle ember falcon fern flame frost galaxy ginger glacier grape harbor hawk honey island ivory jaguar jelly jungle kayak kiwi koala lemon lilac lion lotus lunar mango maple marble meadow melon metro mint moose nectar noble ocean olive onyx orbit otter panda papaya pearl pepper pilot pine planet plum polar prism pulse quartz radar raven reef river robin rocket ruby saber salmon sand shadow shark silver sky snow solar spark spice storm sugar summit sunny tango thunder tiger timber topaz tulip turbo valley velvet violet volcano walnut whale willow wolf zebra".split(" ");
+const pick = n => crypto.getRandomValues(new Uint32Array(1))[0] % n;
+const makePassword = () => `${WORDS[pick(WORDS.length)]}-${WORDS[pick(WORDS.length)]}-${WORDS[pick(WORDS.length)]}-${1000 + pick(9000)}`;
+const slug = s => s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "user";
+
+/* ---- screens ---- */
 function showStep(step){
   document.getElementById("login").hidden = !step;
-  document.getElementById("codeStep").hidden = step !== "code";
-  document.getElementById("keyStep").hidden = step !== "key";
-  if (step === "code"){ document.getElementById("codeIn").value = ""; document.getElementById("codeMsg").textContent = ""; }
-  if (step === "key") document.getElementById("loginMsg").textContent = "";
-}
-function setCode(c){
-  if (myCode && c !== myCode){
-    // a different person: start this device fresh so data never mixes
-    entries = []; lifts = {}; bw = {}; sha = null;
-    put(KEY, entries); put(LKEY, lifts); put(BKEY, bw);
+  document.getElementById("pwStep").hidden = step !== "pw";
+  document.getElementById("ownerStep").hidden = step !== "owner";
+  if (step === "pw"){ document.getElementById("pwIn").value = ""; document.getElementById("pwMsg").textContent = ""; }
+  if (step === "owner"){
+    document.getElementById("ownerMsg").textContent = "";
+    document.getElementById("ownerOut").hidden = true;
+    document.getElementById("existing").textContent = LOCKS.length
+      ? `Already set up: ${LOCKS.map(l => l.name).join(", ")}. Their passwords keep working. Add new people below.`
+      : "Nobody is set up yet. Put yourself first, so you keep all the data you’ve logged so far.";
+    document.getElementById("people").value = LOCKS.length ? "" : "Me";
   }
-  myCode = c;
-  try { localStorage.setItem(CODE_KEY, c); } catch(e){}
-  document.getElementById("codeLine").textContent = `Your code is ${c}.`;
+}
+function setConnected(on){
+  document.getElementById("logout").textContent = on ? "Log out" : "Log in";
+  document.getElementById("codeLine").textContent = on && myName ? `Logged in as ${myName}.` : "";
+  if (!on) status("Saved on this device only.");
+}
+function clearLocal(){
+  entries = []; lifts = {}; bw = {}; sha = null;
+  put(KEY, entries); put(LKEY, lifts); put(BKEY, bw);
   rerender();
 }
-function startSync(){
-  let t = null; try { t = localStorage.getItem(TOKEN_KEY); } catch(e){}
-  if (t){ showStep(null); connect(t, false).then(() => { if (!token){ token = t; setConnected(true); } }); }
-  else showStep("key");
+async function connect(){
+  setConnected(true);
+  try { await pull(true); } catch(e){ fail(e); }
 }
 function initSync(){
-  // setup link: #setup=CODE~KEY
-  const m = location.hash.match(/^#setup=([A-Za-z0-9-]+)~([A-Za-z0-9_]+)$/);
-  if (m){
-    history.replaceState(null, "", location.pathname);
-    const c = m[1].toUpperCase();
-    if (CODES[c]){
-      setCode(c);
-      try { localStorage.setItem(TOKEN_KEY, m[2]); } catch(e){}
-    }
-  }
-  if (!myCode) return showStep("code");
-  document.getElementById("codeLine").textContent = `Your code is ${myCode}.`;
-  startSync();
+  token = ls(TOKEN_KEY);
+  if (token && myFile) return connect();
+  token = null;
+  showStep("pw");
 }
-document.getElementById("codeBtn").addEventListener("click", () => {
-  const c = document.getElementById("codeIn").value.trim().toUpperCase().replace(/\s+/g, "");
-  const msg = document.getElementById("codeMsg");
-  if (!CODES[c]){ msg.className = "toast err"; msg.textContent = "That code doesn’t exist. Check it with whoever gave it to you."; return; }
-  token = null; setCode(c); startSync();
+
+/* ---- log in with password ---- */
+document.getElementById("pwBtn").addEventListener("click", async () => {
+  const pw = document.getElementById("pwIn").value, msg = document.getElementById("pwMsg");
+  if (!normPw(pw)){ msg.className = "toast err"; msg.textContent = "Type your password first."; return; }
+  if (!LOCKS.length){ msg.className = "toast err"; msg.textContent = "No passwords are set up yet. The owner needs to do Owner setup first."; return; }
+  msg.className = "toast"; msg.textContent = "Checking…";
+  for (const L of LOCKS){
+    const secret = await unlockSecret(pw, L);
+    if (!secret) continue;
+    if (myFile && myFile !== L.file) clearLocal();       // different person on this device
+    myFile = L.file; myName = L.name; token = JSON.parse(secret).k;
+    lsSet(FILE_KEY, myFile); lsSet(NAME_KEY, myName); lsSet(TOKEN_KEY, token); lsSet("gymlog.code", null);
+    showStep(null);
+    return connect();
+  }
+  msg.className = "toast err"; msg.textContent = "Wrong password. Check it and try again.";
 });
-document.getElementById("codeIn").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("codeBtn").click(); });
-document.getElementById("switchBtn").addEventListener("click", e => {
+document.getElementById("pwIn").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("pwBtn").click(); });
+document.getElementById("skipBtn").addEventListener("click", () => { showStep(null); setConnected(false); });
+
+document.getElementById("logout").addEventListener("click", e => {
   const b = e.currentTarget;
+  if (!token) return showStep("pw");
   if (!b.classList.contains("sure")){
-    b.classList.add("sure");
-    b.textContent = token ? "Tap again to switch" : "Not synced! Tap again";
-    setTimeout(() => { if (b.isConnected){ b.classList.remove("sure"); b.textContent = "Switch code"; } }, 3000);
+    b.classList.add("sure"); b.textContent = "Tap again to log out";
+    setTimeout(() => { if (b.isConnected && b.classList.contains("sure")){ b.classList.remove("sure"); b.textContent = "Log out"; } }, 3000);
     return;
   }
-  b.classList.remove("sure"); b.textContent = "Switch code";
+  b.classList.remove("sure");
   clearTimeout(saveTimer); saveTimer = null;
-  showStep("code");
+  token = null; myFile = null; myName = null;
+  [TOKEN_KEY, FILE_KEY, NAME_KEY, "gymlog.code"].forEach(k => lsSet(k, null));
+  clearLocal(); setConnected(false);
+  showStep("pw");
 });
-document.getElementById("inviteBtn").addEventListener("click", () => {
-  const box = document.getElementById("inviteBox");
-  box.hidden = !box.hidden;
-  const sel = document.getElementById("inviteCode");
-  sel.innerHTML = Object.keys(CODES).filter(c => c !== myCode).map(c => `<option>${c}</option>`).join("");
-  makeInvite();
+
+/* ---- owner setup: lock the key inside a password for each person ---- */
+let newLocks = null;
+document.getElementById("ownerBtn").addEventListener("click", () => showStep("owner"));
+document.getElementById("ownerBack").addEventListener("click", () => showStep("pw"));
+document.getElementById("genBtn").addEventListener("click", async () => {
+  const msg = document.getElementById("ownerMsg");
+  const key = document.getElementById("tok").value.trim();
+  const names = document.getElementById("people").value.split("\n").map(s => s.trim()).filter(Boolean);
+  msg.className = "toast err";
+  if (!key) return msg.textContent = "Paste your GitHub key first.";
+  if (!names.length) return msg.textContent = "Write at least one name.";
+  msg.className = "toast"; msg.textContent = "Checking your key…";
+  const r = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}`, { headers: { Authorization: `Bearer ${key}` } }).catch(() => null);
+  if (!r || !r.ok){ msg.className = "toast err"; msg.textContent = "That key didn’t work with gym_data. Copy it again from GitHub."; return; }
+  msg.textContent = "Making passwords…";
+  const used = new Set(LOCKS.map(l => l.file));
+  const made = [];
+  for (const name of names){
+    const file = !used.has("data.json") ? "data.json" : `${slug(name)}-${1000 + pick(9000)}.json`;
+    used.add(file);
+    const pw = makePassword();
+    made.push({ name, pw, lock: { name, file, ...(await lockSecret(pw, JSON.stringify({ k: key }))) } });
+  }
+  newLocks = [...LOCKS, ...made.map(m => m.lock)];
+  document.getElementById("pwList").innerHTML = made.map(m => `<li><span>${m.name.replace(/[<>&]/g, "")}</span><b style="font-family:ui-monospace,Menlo,monospace;font-size:.95rem">${m.pw}</b></li>`).join("");
+  document.getElementById("ownerOut").hidden = false;
+  msg.textContent = "";
 });
-document.getElementById("inviteCode").addEventListener("change", makeInvite);
-async function makeInvite(){
-  const hint = document.getElementById("inviteHint"), out = document.getElementById("inviteLink");
-  let t = token; if (!t) try { t = localStorage.getItem(TOKEN_KEY); } catch(e){}
-  if (!t){ out.value = ""; hint.textContent = "Connect to GitHub on this device first, then you can make setup links."; return; }
-  const c = document.getElementById("inviteCode").value;
-  out.value = `${location.origin}${location.pathname}#setup=${c}~${t}`;
-  out.select();
-  try { await navigator.clipboard.writeText(out.value); hint.textContent = `Copied. Send it privately to the person whose code is ${c}. One tap sets everything up for them.`; }
-  catch(e){ hint.textContent = `Copy this link and send it privately to the person whose code is ${c}. One tap sets everything up for them.`; }
-}
-document.getElementById("loginBtn").addEventListener("click", () => {
-  const t = document.getElementById("tok").value.trim();
-  const msg = document.getElementById("loginMsg");
-  if (!t){ msg.className = "toast err"; msg.textContent = "Paste your GitHub key first."; return; }
-  msg.className = "toast"; msg.textContent = "Connecting…";
-  connect(t, true);
-});
-document.getElementById("skipBtn").addEventListener("click", () => { showStep(null); setConnected(false); });
-document.getElementById("logout").addEventListener("click", () => {
-  if (token){
-    token = null; sha = null;
-    try { localStorage.removeItem(TOKEN_KEY); } catch(e){}
-    setConnected(false);
-  } else {
-    showStep("key");
+document.getElementById("dlBtn").addEventListener("click", async () => {
+  const hint = document.getElementById("dlHint");
+  const A = "/*LOCKS-" + "START*/", Z = "/*LOCKS-" + "END*/";
+  const block = `${A}const LOCKS = ${JSON.stringify(newLocks)};${Z}`;
+  try {
+    const src = await (await fetch(location.pathname, { cache: "no-store" })).text();
+    const i = src.indexOf(A), j = src.indexOf(Z);
+    if (i < 0 || j < 0) throw 0;
+    const out = src.slice(0, i) + block + src.slice(j + Z.length);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([out], { type: "text/html" }));
+    a.download = "index.html"; document.body.appendChild(a); a.click(); a.remove();
+    hint.textContent = "Downloaded. Upload this index.html to gym_log to replace the old one. After a minute or two, everyone can log in with just their password.";
+  } catch(e){
+    hint.textContent = "Couldn’t download here. Do this on your computer at your GitHub site instead.";
   }
 });
 document.addEventListener("visibilitychange", () => {
