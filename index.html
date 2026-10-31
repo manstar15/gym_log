@@ -40,6 +40,9 @@ h2{font-size:1.4rem;font-weight:600;margin:0 0 12px}
 section{background:var(--surface);border-radius:14px;padding:18px;margin-bottom:16px}
 label.field{display:block;font-size:.9rem;color:var(--muted);margin-bottom:6px}
 input[type=date],.inp{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;margin-bottom:14px}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;min-height:46px;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+input[type=date]::-webkit-datetime-edit{padding:0}
 .types{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}
 .type{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:1.5rem;padding:18px 0;border-radius:50px;border:3px solid var(--c);background:transparent;color:var(--ink);cursor:pointer;transition:background .15s,color .15s}
 .type[aria-pressed="true"]{background:var(--c);color:#fff}
