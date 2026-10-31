@@ -833,7 +833,7 @@ const ls = k => { try { return localStorage.getItem(k); } catch(e){ return null;
 const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch(e){} };
 
 // One entry per person. Made by Owner setup: the GitHub key is locked inside each password.
-/*LOCKS-START*/const LOCKS = [];/*LOCKS-END*/
+/*LOCKS-START*/const LOCKS = [{"name":"Me","file":"data.json","salt":"ZJ8hMsmwIpdr2ND9tCJtUQ==","iv":"GK3rHkEof7BSX/Sr","data":"uMlVm4e5a1gX1CFSfD9iGWUFsXJTwK1QGhK85qrA1KAno9raTyesHNXw4AxQAA23+MMvPvYUIAhWBhwPRxUhvs0k67ak3YyguWJV5CUMMVa8W4OyhjNYXfeloFw2ctA80meNaa9etvzFyPmdQNfomMYe3QaT"},{"name":"yiftach","file":"yiftach-8594.json","salt":"dFWwxY3UULWJs2ecnxOJ7Q==","iv":"/eWQJEDaxvfT8lR5","data":"S8SksoBSoVd1bmchPkk4Juh1DmzUN4sOnG9N+GDwNoe3MdYxu70/Wvgn6UiRnE3DiuXK21mDaJUeZdEpfK9lvYDEfiYiTsH83FnbkbMXmq3yZz8lCO5Xr1l8gIoCzeQsVDSF1t7dYgmX/dt0ORYK3DXMcaT/"}];/*LOCKS-END*/
 
 let myFile = ls(FILE_KEY), myName = ls(NAME_KEY);
 if (!myFile && ls("gymlog.code") === "MANSTAR-15" && ls(TOKEN_KEY)){ myFile = "data.json"; myName = "Me"; }   // devices set up before passwords
