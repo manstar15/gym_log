@@ -143,11 +143,31 @@ li .tags{display:flex;gap:6px}
 .chip.same{background:var(--bg);color:var(--muted)}
 
 .tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);display:flex;justify-content:center;z-index:5}
-.tabbar div{display:grid;grid-template-columns:1fr 1fr;width:100%;max-width:560px}
+.tabbar div{display:grid;grid-template-columns:1fr 1fr 1fr;width:100%;max-width:560px}
 .tabbar button{font:inherit;font-size:.8rem;font-weight:600;background:transparent;border:0;color:var(--muted);padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
 .tabbar button[aria-selected="true"]{color:var(--ink)}
 .tabbar svg{width:26px;height:26px}
 [hidden]{display:none!important}
+.seg.two{grid-template-columns:1fr 1fr}
+.seg.four{grid-template-columns:repeat(4,1fr)}
+#bwStats{gap:22px}
+#bwStats .big{font-size:2.7rem}
+.bwstep{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-radius:14px;padding:6px;margin-bottom:14px}
+.bwstep button{font:inherit;font-size:1.8rem;width:60px;height:60px;border:0;border-radius:11px;background:var(--surface);color:var(--ink);cursor:pointer}
+.bwstep button:active{transform:scale(.95)}
+.val.bwval{width:auto}
+.bwval input{font-size:3rem;width:130px}
+.bwval small{font-size:1.1rem}
+.today{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.today .cond{font-size:2rem;font-weight:800;line-height:1.1}
+.today p{margin:0;font-size:.85rem;color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin-top:8px}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:18px;height:0;border-top:3px solid var(--c)}
+.legend i.dash{border-top-style:dashed}
+.legend i.dotk{width:9px;height:9px;border:0;border-radius:50%;background:var(--c);opacity:.5}
+.bwrow{display:grid;grid-template-columns:1fr auto auto;gap:4px 14px;align-items:center}
+.bwrow b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:1.25rem}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;resize:vertical}
@@ -217,6 +237,51 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
     <div id="exlist"></div>
   </div>
 
+  <!-- BODY WEIGHT -->
+  <div id="tab-body" hidden>
+    <h1>Body weight</h1>
+    <section aria-label="Log body weight">
+      <div class="seg two" role="tablist" id="bwKind">
+        <button role="tab" data-k="m" aria-selected="true">Morning</button>
+        <button role="tab" data-k="n" aria-selected="false">Night max</button>
+      </div>
+      <p class="hint" id="bwHint"></p>
+      <label class="field" for="bwDate">Date</label>
+      <input type="date" id="bwDate">
+      <div class="bwstep">
+        <button data-d="-1" aria-label="Down 0.1 kilograms">−</button>
+        <label class="val bwval"><input id="bwVal" type="number" inputmode="decimal" step="0.1" min="0" aria-label="Body weight in kilograms"><small>kg</small></label>
+        <button data-d="1" aria-label="Up 0.1 kilograms">+</button>
+      </div>
+      <button class="btn" id="bwSave">Save</button>
+      <div class="toast" id="bwToast" role="status"></div>
+    </section>
+    <section aria-labelledby="bwTodayH">
+      <h2 id="bwTodayH">Today</h2>
+      <div class="today" id="bwToday"></div>
+    </section>
+    <section aria-labelledby="bwTrendH">
+      <h2 id="bwTrendH">Trend</h2>
+      <div class="seg four" role="tablist" id="bwRange">
+        <button role="tab" data-r="14" aria-selected="false">2W</button>
+        <button role="tab" data-r="30" aria-selected="true">1M</button>
+        <button role="tab" data-r="90" aria-selected="false">3M</button>
+        <button role="tab" data-r="0" aria-selected="false">All</button>
+      </div>
+      <div class="stats" id="bwStats"></div>
+      <div class="chart" id="bwChart"></div>
+      <div class="legend">
+        <span><i style="--c:var(--pull)"></i>7-day average</span>
+        <span><i class="dotk" style="--c:var(--pull)"></i>Morning</span>
+        <span><i class="dash" style="--c:var(--legs)"></i>Night max</span>
+      </div>
+    </section>
+    <section aria-labelledby="bwHistH">
+      <h2 id="bwHistH">History</h2>
+      <ul id="bwList"></ul>
+    </section>
+  </div>
+
   <!-- EXERCISE DETAIL -->
   <div id="detail" hidden></div>
 </main>
@@ -242,6 +307,10 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
     <button role="tab" data-tab="weights" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12h10M4 8v8M7 6v12M17 6v12M20 8v8"/></svg>
       Weights
+    </button>
+    <button role="tab" data-tab="body" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M8 9a5.5 5.5 0 0 1 8 0M12 9.5l1.5-2"/></svg>
+      Body
     </button>
   </div>
 </nav>
@@ -285,8 +354,10 @@ function showTab(t){
   document.querySelectorAll(".tabbar button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
   document.getElementById("tab-sessions").hidden = t !== "sessions";
   document.getElementById("tab-weights").hidden = t !== "weights";
+  document.getElementById("tab-body").hidden = t !== "body";
   document.getElementById("detail").hidden = true;
   if (t === "weights") renderExercises();
+  if (t === "body") renderBody();
   window.scrollTo(0,0);
 }
 
@@ -588,6 +659,142 @@ function openDetail(id){
   window.scrollTo(0,0);
 }
 
+/* ================= body weight ================= */
+const BKEY = "gymlog.body.v1";
+let bw = store(BKEY, {});           // { "2026-10-31": { m:{kg,t}, n:{kg,t} } }
+let bwKind = new Date().getHours() < 15 ? "m" : "n";
+let bwRange = 30;
+const KIND = { m: "morning", n: "night max" };
+const r1 = n => Math.round(n*10)/10;
+const kg1 = n => r1(n).toFixed(1);
+const signed = n => (r1(n) > 0 ? "+" : r1(n) < 0 ? "−" : "±") + Math.abs(r1(n)).toFixed(1);
+const hhmm = m => `${pad(Math.floor(m/60))}:${pad(Math.round(m%60))}`;
+
+const series = k => Object.keys(bw).sort().filter(d => bw[d][k]).map(d => ({ date: d, kg: bw[d][k].kg }));
+function avgOver(list, endDate, days){
+  const end = parse(endDate), start = addDays(end, -(days-1));
+  const v = list.filter(x => { const d = parse(x.date); return d >= start && d <= end; }).map(x => x.kg);
+  return v.length ? v.reduce((a,b) => a+b, 0) / v.length : null;
+}
+function usualMorning(){
+  const t = Object.keys(bw).sort().filter(d => bw[d].m && bw[d].m.t != null).slice(-10).map(d => bw[d].m.t).sort((a,b) => a-b);
+  return t.length >= 3 ? t[Math.floor(t.length/2)] : null;
+}
+function lastOf(k){ const s = series(k); return s.length ? s[s.length-1].kg : null; }
+
+const bwDate = document.getElementById("bwDate"), bwVal = document.getElementById("bwVal");
+bwDate.value = iso(new Date());
+
+function fillBwValue(){
+  const day = bw[bwDate.value] || {};
+  const v = day[bwKind] ? day[bwKind].kg : (lastOf(bwKind) ?? lastOf(bwKind === "m" ? "n" : "m") ?? 70);
+  bwVal.value = kg1(v);
+  document.getElementById("bwSave").textContent = `${day[bwKind] ? "Update" : "Save"} ${KIND[bwKind]} weight`;
+}
+function renderBwHint(){
+  const u = usualMorning();
+  document.getElementById("bwHint").textContent = bwKind === "m"
+    ? (u != null ? `You usually weigh in around ${hhmm(u)}. Keeping it close to that time, after the bathroom and before eating, keeps your trend accurate.`
+                 : "Weigh in at the same time every morning, after the bathroom and before eating or drinking. That keeps your trend accurate.")
+    : "Your heaviest weight of the day, right before bed.";
+}
+document.querySelectorAll("#bwKind button").forEach(b => b.addEventListener("click", () => {
+  bwKind = b.dataset.k;
+  document.querySelectorAll("#bwKind button").forEach(x => x.setAttribute("aria-selected", x === b));
+  renderBwHint(); fillBwValue();
+  document.getElementById("bwToast").textContent = "";
+}));
+document.querySelectorAll(".bwstep button").forEach(b => b.addEventListener("click", () => {
+  const v = parseFloat(bwVal.value) || 0;
+  bwVal.value = kg1(Math.max(0, v + 0.1 * Number(b.dataset.d)));
+}));
+bwDate.addEventListener("change", fillBwValue);
+document.getElementById("bwSave").addEventListener("click", () => {
+  const v = parseFloat(bwVal.value), toast = document.getElementById("bwToast");
+  if (!bwDate.value || isNaN(v) || v <= 0){ toast.textContent = "Enter your weight in kg first."; return; }
+  const today = bwDate.value === iso(new Date());
+  const d = new Date(), mins = d.getHours()*60 + d.getMinutes();
+  const usual = usualMorning();
+  (bw[bwDate.value] = bw[bwDate.value] || {})[bwKind] = { kg: r1(v), t: today ? mins : null };
+  saveAll();
+  let msg = `Saved ${kg1(v)} kg as your ${KIND[bwKind]} weight.`;
+  if (bwKind === "m" && today && usual != null && Math.abs(mins - usual) > 90)
+    msg += ` That’s ${mins > usual ? "later" : "earlier"} than usual (around ${hhmm(usual)}), so it may read a bit ${mins > usual ? "high" : "low"}.`;
+  renderBody();
+  toast.textContent = msg;
+});
+document.querySelectorAll("#bwRange button").forEach(b => b.addEventListener("click", () => {
+  bwRange = Number(b.dataset.r);
+  document.querySelectorAll("#bwRange button").forEach(x => x.setAttribute("aria-selected", x === b));
+  renderBody();
+}));
+
+function bwChart(m, n, mAll){
+  const all = [...m, ...n];
+  if (!all.length) return `<p class="empty">Your chart starts after your first weigh-in.</p>`;
+  const W = 320, H = 170, L = 34, R = 12, T = 12, B = 24;
+  const ms = all.map(x => parse(x.date).getTime());
+  const t0 = Math.min(...ms), t1 = Math.max(...ms);
+  const avg = m.map(x => ({ date: x.date, kg: avgOver(mAll, x.date, 7) }));
+  const vlo = Math.min(...all.map(x => x.kg)), vhi = Math.max(...all.map(x => x.kg));
+  const lo = vlo - 0.4, hi = vhi + 0.4;
+  const X = d => t1 === t0 ? (L + W - R) / 2 : L + (parse(d).getTime() - t0) / (t1 - t0) * (W - L - R);
+  const Y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+  const path = list => list.map((x,i) => `${i ? "L" : "M"}${X(x.date).toFixed(1)} ${Y(x.kg).toFixed(1)}`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Body weight over time">
+    <line x1="${L}" x2="${W-R}" y1="${Y(vhi)}" y2="${Y(vhi)}" stroke="var(--line)" stroke-dasharray="3 4"/>
+    <line x1="${L}" x2="${W-R}" y1="${Y(vlo)}" y2="${Y(vlo)}" stroke="var(--line)"/>
+    <text x="${L-6}" y="${Y(vhi)+3}" text-anchor="end">${kg1(vhi)}</text>
+    ${vhi !== vlo ? `<text x="${L-6}" y="${Y(vlo)+3}" text-anchor="end">${kg1(vlo)}</text>` : ""}
+    ${n.length > 1 ? `<path d="${path(n)}" fill="none" stroke="var(--legs)" stroke-width="2" stroke-dasharray="4 4"/>` : ""}
+    ${n.map(x => `<circle cx="${X(x.date).toFixed(1)}" cy="${Y(x.kg).toFixed(1)}" r="2.5" fill="var(--legs)"/>`).join("")}
+    ${m.map(x => `<circle cx="${X(x.date).toFixed(1)}" cy="${Y(x.kg).toFixed(1)}" r="3.5" fill="var(--pull)" opacity=".35"/>`).join("")}
+    ${avg.length > 1 ? `<path d="${path(avg)}" fill="none" stroke="var(--pull)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>` : ""}
+    <text x="${L}" y="${H-6}">${parse(iso(new Date(t0))).getDate()} ${MONTHS[new Date(t0).getMonth()]}</text>
+    ${t1 !== t0 ? `<text x="${W-R}" y="${H-6}" text-anchor="end">${new Date(t1).getDate()} ${MONTHS[new Date(t1).getMonth()]}</text>` : ""}
+  </svg>`;
+}
+
+function renderBody(){
+  renderBwHint(); fillBwValue();
+  const today = iso(new Date()), td = bw[today] || {};
+  const gap = td.m && td.n ? td.n.kg - td.m.kg : null;
+  document.getElementById("bwToday").innerHTML = `
+    <div><div class="cond">${td.m ? kg1(td.m.kg) : "–"}</div><p>Morning${td.m && td.m.t != null ? ` at ${hhmm(td.m.t)}` : ""}</p></div>
+    <div><div class="cond">${td.n ? kg1(td.n.kg) : "–"}</div><p>Night max</p></div>
+    <div><div class="cond">${gap != null ? signed(gap) : "–"}</div><p>Gained during the day</p></div>`;
+
+  const M = series("m"), N = series("n");
+  const a7 = avgOver(M, today, 7), prev7 = avgOver(M, iso(addDays(new Date(), -7)), 7);
+  const a28 = avgOver(M, iso(addDays(new Date(), -28)), 7);
+  const statsEl = document.getElementById("bwStats");
+  if (!M.length) statsEl.innerHTML = `<p class="empty">Log a few mornings and your average and weekly change show up here.</p>`;
+  else {
+    const wk = a7 != null && prev7 != null ? a7 - prev7 : null;
+    const mo = a7 != null && a28 != null ? a7 - a28 : null;
+    const cls = v => r1(v) > 0 ? "up" : r1(v) < 0 ? "down" : "";
+    statsEl.innerHTML = `
+      <div><div class="big">${kg1(a7 ?? M[M.length-1].kg)}<span style="font-size:1.3rem"> kg</span></div><p>${a7 != null ? "7-day average" : "Last morning"}</p></div>
+      <div><div class="big chg ${wk != null ? cls(wk) : ""}">${wk != null ? signed(wk) : "–"}</div><p>${wk != null ? "vs. last week" : "Shows after 2 weeks"}</p></div>
+      ${mo != null ? `<div><div class="big chg ${cls(mo)}">${signed(mo)}</div><p>vs. 4 weeks ago</p></div>` : ""}`;
+  }
+  const from = bwRange ? iso(addDays(new Date(), -(bwRange-1))) : "0000";
+  document.getElementById("bwChart").innerHTML = bwChart(M.filter(x => x.date >= from), N.filter(x => x.date >= from), M);
+
+  const days = Object.keys(bw).filter(d => bw[d].m || bw[d].n).sort().reverse().slice(0, 60);
+  const ul = document.getElementById("bwList");
+  if (!days.length){ ul.innerHTML = `<p class="empty">No weigh-ins yet. Save your first one above.</p>`; return; }
+  ul.innerHTML = days.map(d => { const x = bw[d];
+    return `<li class="bwrow"><div>${fmt(parse(d))}<div class="exsub">${x.m && x.n ? `${signed(x.n.kg - x.m.kg)} kg during the day` : ""}</div></div>
+      <div style="text-align:right"><b>${x.m ? kg1(x.m.kg) : "–"}</b><div class="exsub">Morning</div></div>
+      <div style="text-align:right"><b>${x.n ? kg1(x.n.kg) : "–"}</b><div class="exsub">Night</div></div>
+      <button class="del" data-d="${d}" style="grid-column:1/-1;justify-self:end;padding:0 6px">Delete</button></li>`; }).join("");
+  ul.querySelectorAll(".del").forEach(b => b.addEventListener("click", () => armDelete(b, () => {
+    delete bw[b.dataset.d]; saveAll(); renderBody();
+  })));
+}
+document.querySelector(`#bwKind button[data-k="${bwKind}"]`).click();
+
 /* ================= sync to GitHub ================= */
 // Everything is saved to data.json in this repository:
 const GH_OWNER = "manstar15";
@@ -606,6 +813,7 @@ function rerender(){
   render();
   if (currentDetail) openDetail(currentDetail);
   else if (tab === "weights") renderExercises();
+  else if (tab === "body") renderBody();
 }
 function merge(a, b){
   const E = new Map();
@@ -616,7 +824,9 @@ function merge(a, b){
     src[k].forEach(x => m.set(x.id, x));
     L[k] = [...m.values()];
   }
-  return { entries: [...E.values()], lifts: L };
+  const B = {};
+  for (const src of [a.bw||{}, b.bw||{}]) for (const d in src) B[d] = { ...(B[d]||{}), ...src[d] };
+  return { entries: [...E.values()], lifts: L, bw: B };
 }
 async function gh(method, body){
   return fetch(API, {
@@ -640,12 +850,12 @@ async function readFile(){
   return { data: JSON.parse(dec(j.content)), sha: j.sha };
 }
 async function writeFile(){
-  const r = await gh("PUT", { message: `Gym log update ${iso(new Date())}`, content: enc(JSON.stringify({ entries, lifts }, null, 1)), ...(sha ? { sha } : {}) });
+  const r = await gh("PUT", { message: `Gym log update ${iso(new Date())}`, content: enc(JSON.stringify({ entries, lifts, bw }, null, 1)), ...(sha ? { sha } : {}) });
   if (r.status === 409 || r.status === 422){
     // changed on another device since we last read it: combine both and try again
     const f = await readFile(); sha = f.sha;
-    if (f.data){ const m = merge(f.data, { entries, lifts }); entries = m.entries; lifts = m.lifts; put(KEY, entries); put(LKEY, lifts); rerender(); }
-    const r2 = await gh("PUT", { message: `Gym log update ${iso(new Date())}`, content: enc(JSON.stringify({ entries, lifts }, null, 1)), ...(sha ? { sha } : {}) });
+    if (f.data){ const m = merge(f.data, { entries, lifts, bw }); entries = m.entries; lifts = m.lifts; bw = m.bw || {}; put(KEY, entries); put(LKEY, lifts); put(BKEY, bw); rerender(); }
+    const r2 = await gh("PUT", { message: `Gym log update ${iso(new Date())}`, content: enc(JSON.stringify({ entries, lifts, bw }, null, 1)), ...(sha ? { sha } : {}) });
     if (!r2.ok) throw { code: "net" };
     sha = (await r2.json()).content.sha; return;
   }
@@ -658,7 +868,7 @@ function fail(e){
        : "Couldn’t reach GitHub. Your changes are saved on this device and will sync next time.");
 }
 function saveAll(){
-  put(KEY, entries); put(LKEY, lifts);
+  put(KEY, entries); put(LKEY, lifts); put(BKEY, bw);
   if (!token) return;
   status("Saving…");
   clearTimeout(saveTimer);
@@ -677,11 +887,11 @@ async function pull(first){
   try {
     const f = await readFile();
     sha = f.sha;
-    const cloud = f.data || { entries: [], lifts: {} };
-    const next = first ? merge(cloud, { entries, lifts }) : cloud;
+    const cloud = f.data || { entries: [], lifts: {}, bw: {} };
+    const next = first ? merge(cloud, { entries, lifts, bw }) : cloud;
     const changed = JSON.stringify(next) !== JSON.stringify(cloud);
-    entries = next.entries || []; lifts = next.lifts || {};
-    put(KEY, entries); put(LKEY, lifts);
+    entries = next.entries || []; lifts = next.lifts || {}; bw = next.bw || {};
+    put(KEY, entries); put(LKEY, lifts); put(BKEY, bw);
     rerender();
     if (first && (changed || !f.data)) await writeFile();
     status(`Synced with GitHub at ${now()}.`);
@@ -741,7 +951,7 @@ const box = document.getElementById("dataBox"), txt = document.getElementById("d
       hint = document.getElementById("dataHint"), go = document.getElementById("dataGo");
 document.getElementById("exportBtn").addEventListener("click", async () => {
   box.hidden = false; go.hidden = true;
-  txt.value = JSON.stringify({ entries, lifts });
+  txt.value = JSON.stringify({ entries, lifts, bw });
   txt.focus(); txt.select();
   try { await navigator.clipboard.writeText(txt.value); hint.textContent = "Copied. Open your other site, tap Restore and paste it there."; }
   catch(e){ hint.textContent = "Select all of this text and copy it. Then open your other site, tap Restore and paste it there."; }
@@ -755,8 +965,8 @@ go.addEventListener("click", () => {
   let data;
   try { data = JSON.parse(txt.value); } catch(e){ hint.textContent = "That text isn’t a backup. Copy the whole thing from Back up and try again."; return; }
   if (!Array.isArray(data.entries) || typeof data.lifts !== "object"){ hint.textContent = "That text isn’t a backup. Copy the whole thing from Back up and try again."; return; }
-  const next = merge({ entries, lifts }, data);
-  entries = next.entries; lifts = next.lifts;
+  const next = merge({ entries, lifts, bw }, data);
+  entries = next.entries; lifts = next.lifts; bw = next.bw || {};
   saveAll(); rerender();
   hint.textContent = `Restored. You now have ${entries.length} sessions saved.`;
   go.hidden = true;
