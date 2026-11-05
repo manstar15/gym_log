@@ -173,11 +173,12 @@ li .tags{display:flex;gap:6px}
 .badge{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff;transition:background .2s,color .2s}
 .badge svg{width:23px;height:23px}
 .act[aria-pressed="true"] .badge{background:#fff;color:var(--c)}
-.sheet{position:fixed;inset:0;z-index:50;touch-action:none;overscroll-behavior:contain}
-.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;transition:opacity .3s ease}
-.sheet.open .sheet-bg{opacity:1}
+dialog.sheet{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;background:transparent;color:inherit;touch-action:none;overscroll-behavior:contain;outline:0}
+dialog.sheet:not([open]){display:none}
+dialog.sheet::backdrop{background:rgba(0,0,0,.45);opacity:0;transition:opacity .3s ease}
+dialog.sheet.up::backdrop{opacity:1}
 .sheet-panel{position:absolute;left:0;right:0;bottom:0;margin:0 auto;width:100%;max-width:560px;background:var(--surface);border-radius:26px 26px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom,0px));-webkit-transform:translate3d(0,105%,0);transform:translate3d(0,105%,0);transition:transform .36s cubic-bezier(.32,.72,0,1)}
-.sheet.open .sheet-panel{-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}
+.sheet.up .sheet-panel{-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}
 .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
 .sheet h2{margin:0 0 4px}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 16px}
@@ -480,8 +481,7 @@ main{position:relative;z-index:0;isolation:isolate}
   </section>
 </div>
 
-<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
-  <div class="sheet-bg"></div>
+<dialog class="sheet" id="sheet" aria-labelledby="sheetTitle">
   <div class="sheet-panel">
     <div class="grab" aria-hidden="true"></div>
     <h2 id="sheetTitle">Cardio &amp; sports</h2>
@@ -495,7 +495,7 @@ main{position:relative;z-index:0;isolation:isolate}
     </div>
     <button class="btn" id="sheetDone">Done</button>
   </div>
-</div>
+</dialog>
 
 <div class="cheer" id="cheer" hidden role="dialog" aria-live="polite">
   <canvas id="confetti" aria-hidden="true"></canvas>
@@ -1472,59 +1472,51 @@ go.addEventListener("click", () => {
   go.hidden = true;
 });
 
-/* ---- cardio & sports sheet ---- */
+/* ---- cardio & sports sheet (a real <dialog>, drawn by the browser in its own top layer) ---- */
 const sheet = document.getElementById("sheet");
 const panel = sheet.querySelector(".sheet-panel");
-const sheetBg = sheet.querySelector(".sheet-bg");
 document.querySelectorAll(".badge").forEach(b => b.innerHTML = sportSvg(b.dataset.ic));
 syncPicks();
 const EASE = "cubic-bezier(.32,.72,0,1)";
 let sheetTimer = null;
 const setY = y => { panel.style.transform = panel.style.webkitTransform = `translate3d(0,${y},0)`; };
-function clearInline(){
-  panel.style.transition = panel.style.transform = panel.style.webkitTransform = "";
-  sheetBg.style.transition = sheetBg.style.opacity = "";
-}
+function clearInline(){ panel.style.transition = panel.style.transform = panel.style.webkitTransform = ""; }
 function openSheet(){
   clearTimeout(sheetTimer); clearInline();
-  sheet.hidden = false;
-  requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.add("open")));
+  if (!sheet.open){ try { sheet.showModal(); } catch(e){ sheet.setAttribute("open", ""); } }
+  requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.add("up")));
 }
 function closeSheet(){
-  if (sheet.hidden) return;
+  if (!sheet.open) return;
   clearTimeout(sheetTimer);
-  // slide from wherever the panel is right now down off the screen
   const m = getComputedStyle(panel).transform.match(/matrix(3d)?\((.+)\)/);
   const cur = m ? Number(m[2].split(",")[m[1] ? 13 : 5]) : 0;
   panel.style.transition = "none"; setY(`${cur}px`); void panel.offsetHeight;
   panel.style.transition = `transform .3s ${EASE}`; setY("105%");
-  sheetBg.style.transition = "opacity .3s ease"; sheetBg.style.opacity = "0";
-  sheet.classList.remove("open");
-  sheetTimer = setTimeout(() => { sheet.hidden = true; clearInline(); }, 310);
+  sheet.classList.remove("up");
+  sheetTimer = setTimeout(() => { try { sheet.close(); } catch(e){ sheet.removeAttribute("open"); } clearInline(); }, 310);
 }
 document.getElementById("moreBtn").addEventListener("click", openSheet);
 document.getElementById("sheetDone").addEventListener("click", closeSheet);
-sheetBg.addEventListener("click", closeSheet);
+sheet.addEventListener("click", e => { if (e.target === sheet) closeSheet(); });   // tap the dim area
+sheet.addEventListener("cancel", e => { e.preventDefault(); closeSheet(); });     // escape key
 
-// swipe the panel down to close: only the panel moves; it never fades
+// swipe the panel down to close
 (() => {
   let y0 = null, dy = 0, dragging = false, lastY = 0, lastT = 0, vel = 0, justDragged = false;
-  sheet.addEventListener("touchstart", e => {
-    if (!sheet.classList.contains("open")) return;
+  panel.addEventListener("touchstart", e => {
     y0 = lastY = e.touches[0].clientY; lastT = performance.now(); dy = 0; vel = 0; dragging = false;
   }, { passive: true });
   sheet.addEventListener("touchmove", e => {
     e.preventDefault();                                  // never scroll the page behind
     if (y0 == null) return;
     const y = e.touches[0].clientY, now = performance.now();
-    if (!dragging && Math.abs(y - y0) < 10) return;      // small wiggles are still taps
+    if (!dragging && Math.abs(y - y0) < 10) return;
     if (!dragging){ dragging = true; y0 = y; }
     const d = y - y0;
     dy = d > 0 ? d : -Math.sqrt(-d) * 2.5;
     vel = (y - lastY) / Math.max(1, now - lastT); lastY = y; lastT = now;
     panel.style.transition = "none"; setY(`${dy}px`);
-    sheetBg.style.transition = "none";
-    sheetBg.style.opacity = String(Math.max(0, 1 - Math.max(0, dy) / panel.offsetHeight).toFixed(3));
   }, { passive: false });
   const end = () => {
     if (y0 == null) return;
@@ -1533,12 +1525,11 @@ sheetBg.addEventListener("click", closeSheet);
     justDragged = true; setTimeout(() => justDragged = false, 350);
     if (dy > panel.offsetHeight * .3 || (dy > 20 && vel > .45)) return closeSheet();
     panel.style.transition = `transform .32s ${EASE}`; setY("0");
-    sheetBg.style.transition = "opacity .32s ease"; sheetBg.style.opacity = "1";
     sheetTimer = setTimeout(clearInline, 340);
   };
-  sheet.addEventListener("touchend", end);
-  sheet.addEventListener("touchcancel", end);
-  sheet.addEventListener("click", e => { if (justDragged){ e.stopPropagation(); e.preventDefault(); } }, true);
+  panel.addEventListener("touchend", end);
+  panel.addEventListener("touchcancel", end);
+  panel.addEventListener("click", e => { if (justDragged){ e.stopPropagation(); e.preventDefault(); } }, true);
 })();
 
 /* ---- steps (sent from an iPhone shortcut as #steps=1234) ---- */
