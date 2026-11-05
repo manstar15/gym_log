@@ -1563,7 +1563,10 @@ async function fetchSteps(){
       return;
     }
     if (!r.ok) return;
-    const j = JSON.parse(dec((await r.json()).content).replace(/[“”„″]/g, '"'));   // iPhone curly quotes are fine
+    // read it loosely: curly quotes, "148 steps", commas, it all works
+    const raw = dec((await r.json()).content).replace(/[“”„″]/g, '"');
+    const dm = raw.match(/"d"\s*:\s*"([^"]*)"/), nm = raw.match(/"n"\s*:\s*"?\s*([\d.,]+)/);
+    const j = { d: dm ? dm[1] : "", n: nm ? parseFloat(nm[1].replace(/,/g, "")) : 0 };
     const when = String(j.d || "");
     if (when.slice(0, 10) === iso(new Date())){
       const [h, m] = (when.slice(11, 16) || "00:00").split(":").map(Number);
