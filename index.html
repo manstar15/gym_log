@@ -1377,7 +1377,7 @@ function showStep(step){
     document.getElementById("ownerMsg").textContent = "";
     document.getElementById("ownerOut").hidden = true;
     document.getElementById("existing").textContent = LOCKS.length
-      ? `Already set up: ${LOCKS.map(l => l.name).join(", ")}. Their passwords keep working. Add new people below.`
+      ? `Already set up: ${LOCKS.map(l => l.name).join(", ")}. Write a new name to add someone, or an existing name to give them a new password (their data stays).`
       : "Nobody is set up yet. Put yourself first, so you keep all the data you’ve logged so far.";
     document.getElementById("people").value = LOCKS.length ? "" : "Me";
   }
@@ -1458,12 +1458,14 @@ document.getElementById("genBtn").addEventListener("click", async () => {
   const used = new Set(LOCKS.map(l => l.file));
   const made = [];
   for (const name of names){
-    const file = !used.has("data.json") ? "data.json" : `${slug(name)}-${1000 + pick(9000)}.json`;
+    const existing = LOCKS.find(l => l.name.trim().toLowerCase() === name.toLowerCase());
+    const file = existing ? existing.file : !used.has("data.json") ? "data.json" : `${slug(name)}-${1000 + pick(9000)}.json`;
     used.add(file);
     const pw = makePassword();
     made.push({ name, pw, lock: { name, file, ...(await lockSecret(pw, JSON.stringify({ k: key }))) } });
   }
-  newLocks = [...LOCKS, ...made.map(m => m.lock)];
+  const renamed = new Set(made.map(m => m.lock.name.trim().toLowerCase()));
+  newLocks = [...LOCKS.filter(l => !renamed.has(l.name.trim().toLowerCase())), ...made.map(m => m.lock)];
   document.getElementById("pwList").innerHTML = made.map(m => `<li><span>${m.name.replace(/[<>&]/g, "")}</span><b style="font-family:ui-monospace,Menlo,monospace;font-size:.95rem">${m.pw}</b></li>`).join("");
   document.getElementById("ownerOut").hidden = false;
   msg.textContent = "";
@@ -1542,26 +1544,31 @@ const STEP_GOAL = 10000;
 let remoteSteps = null;   // { n, t } for today, written straight to GitHub by the shortcut
 async function fetchSteps(){
   if (!token || myFile !== "data.json") return;          // steps are only connected for the owner
-  const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/steps.json`;
+  const base = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}`;
   const headers = { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" };
   try {
-    const r = await fetch(url, { cache: "no-store", headers });
+    const r = await fetch(`${base}/contents/steps.json?t=${Date.now()}`, { cache: "no-store", headers });
     if (r.status === 404){
-      // make the file once so the shortcut has something to update
-      await fetch(url, { method: "PUT", headers, body: JSON.stringify({ message: "Create steps file", content: enc(JSON.stringify({ d: "", n: 0 })) }) });
+      await fetch(`${base}/contents/steps.json`, { method: "PUT", headers, body: JSON.stringify({ message: "Create steps file", content: enc(JSON.stringify({ d: "", n: 0 })) }) });
       return;
     }
     if (!r.ok) return;
-    // read it loosely: curly quotes, "148 steps", commas, it all works
+    // read it loosely: curly quotes, "3,493 steps", any date format
     const raw = dec((await r.json()).content).replace(/[“”„″]/g, '"');
-    const dm = raw.match(/"d"\s*:\s*"([^"]*)"/), nm = raw.match(/"n"\s*:\s*"?\s*([\d.,]+)/);
-    const j = { d: dm ? dm[1] : "", n: nm ? parseFloat(nm[1].replace(/,/g, "")) : 0 };
-    const when = String(j.d || "");
-    if (when.slice(0, 10) === iso(new Date())){
-      const [h, m] = (when.slice(11, 16) || "00:00").split(":").map(Number);
-      remoteSteps = { n: Math.round(Number(j.n) || 0), t: h * 60 + m };
-      renderSteps();
+    const nm = raw.match(/"n"\s*:\s*"?\s*([\d.,]+)/);
+    if (!nm) return;
+    const n = Math.round(parseFloat(nm[1].replace(/,/g, "")));
+    // when was it saved? use the date inside if it's clear, otherwise ask GitHub when the file last changed
+    let when = null;
+    const dm = raw.match(/(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})/);
+    if (dm) when = new Date(+dm[1], +dm[2] - 1, +dm[3], +dm[4], +dm[5]);
+    else {
+      const c = await fetch(`${base}/commits?path=steps.json&per_page=1&t=${Date.now()}`, { cache: "no-store", headers });
+      if (c.ok){ const list = await c.json(); if (list[0]) when = new Date(list[0].commit.committer.date); }
     }
+    if (!when || iso(when) !== iso(new Date())) return;
+    remoteSteps = { n, t: when.getHours() * 60 + when.getMinutes() };
+    renderSteps();
   } catch(e){}
 }
 function renderSteps(){
