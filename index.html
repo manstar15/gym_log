@@ -173,15 +173,13 @@ li .tags{display:flex;gap:6px}
 .badge{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff;transition:background .2s,color .2s}
 .badge svg{width:23px;height:23px}
 .act[aria-pressed="true"] .badge{background:#fff;color:var(--c)}
-.sheet{touch-action:none;overscroll-behavior:contain;position:fixed;inset:0;z-index:50;-webkit-transform:translateZ(0);transform:translateZ(0);isolation:isolate;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0);transition:background .3s ease}
-.sheet.open{background:var(--cover)}
-html.sheet-covered .sheet:not(.open){background:var(--bg)}
-:root{--cover:rgba(16,18,20,.82)}
-html.sheet-covered main,html.sheet-covered .tabbar{visibility:hidden}
-html.sheet-reveal main,html.sheet-reveal .tabbar{animation:revealIn .25s ease-out}
-@keyframes revealIn{from{opacity:0}to{opacity:1}}
-.sheet-panel{width:100%;max-width:560px;background:var(--surface);border-radius:26px 26px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .36s cubic-bezier(.32,.72,0,1);-webkit-backface-visibility:hidden;backface-visibility:hidden}
-.sheet.open .sheet-panel{transform:none}
+.sheet{position:fixed;inset:0;z-index:50;touch-action:none;overscroll-behavior:contain}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;transition:opacity .3s ease}
+.sheet.open .sheet-bg{opacity:1}
+.sheet-panel{position:absolute;left:0;right:0;bottom:0;margin:0 auto;width:100%;max-width:560px;background:var(--surface);border-radius:26px 26px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom,0px));
+  opacity:1!important;-webkit-transform:translate3d(0,105%,0);transform:translate3d(0,105%,0);transition:transform .36s cubic-bezier(.32,.72,0,1);box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+.sheet.open .sheet-panel{-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}
+.tabbar{-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}
 .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
 .sheet h2{margin:0 0 4px}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 16px}
@@ -324,9 +322,6 @@ textarea,select,input{font-size:max(16px,1em)}
 
 /* keep the page in its own layer stack so nothing can paint over the panels (iPhone Safari bug) */
 main{position:relative;z-index:0;isolation:isolate}
-.sheet,.cheer,.login{isolation:isolate;-webkit-transform:translateZ(0);transform:translateZ(0)}
-.sheet-panel{-webkit-transform-style:flat}
-html.sheet-open main *,html.sheet-open .tabbar *{transition:none!important}
 </style>
 </head>
 <body>
@@ -488,6 +483,7 @@ html.sheet-open main *,html.sheet-open .tabbar *{transition:none!important}
 </div>
 
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-bg"></div>
   <div class="sheet-panel">
     <div class="grab" aria-hidden="true"></div>
     <h2 id="sheetTitle">Cardio &amp; sports</h2>
@@ -1481,50 +1477,38 @@ go.addEventListener("click", () => {
 /* ---- cardio & sports sheet ---- */
 const sheet = document.getElementById("sheet");
 const panel = sheet.querySelector(".sheet-panel");
+const sheetBg = sheet.querySelector(".sheet-bg");
 document.querySelectorAll(".badge").forEach(b => b.innerHTML = sportSvg(b.dataset.ic));
 syncPicks();
 const EASE = "cubic-bezier(.32,.72,0,1)";
 let sheetTimer = null;
+const setY = y => { panel.style.transform = panel.style.webkitTransform = `translate3d(0,${y},0)`; };
 function clearInline(){
-  panel.style.transition = panel.style.transform = "";
-  sheet.style.transition = sheet.style.background = "";
-}
-const root = document.documentElement;
-let coverTimer = null;
-function cover(on){
-  clearTimeout(coverTimer);
-  if (on) coverTimer = setTimeout(() => root.classList.add("sheet-covered"), 320);   // after the fade finishes
-  else root.classList.remove("sheet-covered");
+  panel.style.transition = panel.style.transform = panel.style.webkitTransform = "";
+  sheetBg.style.transition = sheetBg.style.opacity = "";
 }
 function openSheet(){
   clearTimeout(sheetTimer); clearInline();
-  root.classList.add("sheet-open");
   sheet.hidden = false;
-  requestAnimationFrame(() => requestAnimationFrame(() => { sheet.classList.add("open"); cover(true); }));
+  requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.add("open")));
 }
 function closeSheet(){
   if (sheet.hidden) return;
-  clearTimeout(sheetTimer); clearTimeout(coverTimer);
-  // animate from wherever the panel is right now down off the screen
-  const from = getComputedStyle(panel).transform;
-  panel.style.transition = "none";
-  panel.style.transform = from === "none" ? "translateY(0)" : from;
-  void panel.offsetHeight;
-  panel.style.transition = `transform .3s ${EASE}`;
-  panel.style.transform = "translateY(105%)";
+  clearTimeout(sheetTimer);
+  // slide from wherever the panel is right now down off the screen
+  const m = getComputedStyle(panel).transform.match(/matrix(3d)?\((.+)\)/);
+  const cur = m ? Number(m[2].split(",")[m[1] ? 13 : 5]) : 0;
+  panel.style.transition = "none"; setY(`${cur}px`); void panel.offsetHeight;
+  panel.style.transition = `transform .3s ${EASE}`; setY("105%");
+  sheetBg.style.transition = "opacity .3s ease"; sheetBg.style.opacity = "0";
   sheet.classList.remove("open");
-  sheetTimer = setTimeout(() => {
-    sheet.hidden = true; clearInline();
-    root.classList.remove("sheet-open", "sheet-covered");
-    root.classList.add("sheet-reveal");                   // page fades back in
-    setTimeout(() => root.classList.remove("sheet-reveal"), 300);
-  }, 310);
+  sheetTimer = setTimeout(() => { sheet.hidden = true; clearInline(); }, 310);
 }
 document.getElementById("moreBtn").addEventListener("click", openSheet);
 document.getElementById("sheetDone").addEventListener("click", closeSheet);
-sheet.addEventListener("click", e => { if (e.target === sheet) closeSheet(); });
+sheetBg.addEventListener("click", closeSheet);
 
-// swipe the panel down to close: only the panel moves, the page stays put
+// swipe the panel down to close: only the panel moves; it never fades
 (() => {
   let y0 = null, dy = 0, dragging = false, lastY = 0, lastT = 0, vel = 0, justDragged = false;
   sheet.addEventListener("touchstart", e => {
@@ -1534,15 +1518,15 @@ sheet.addEventListener("click", e => { if (e.target === sheet) closeSheet(); });
   sheet.addEventListener("touchmove", e => {
     e.preventDefault();                                  // never scroll the page behind
     if (y0 == null) return;
-    const y = e.touches[0].clientY, raw = y - y0, now = performance.now();
-    if (!dragging && Math.abs(raw) < 10) return;         // small wiggles are still taps
-    if (!dragging){ dragging = true; y0 = y; }           // start from here so it doesn't jump
+    const y = e.touches[0].clientY, now = performance.now();
+    if (!dragging && Math.abs(y - y0) < 10) return;      // small wiggles are still taps
+    if (!dragging){ dragging = true; y0 = y; }
     const d = y - y0;
-    dy = d > 0 ? d : -Math.sqrt(-d) * 2.5;               // a little stretch when pulled up
+    dy = d > 0 ? d : -Math.sqrt(-d) * 2.5;
     vel = (y - lastY) / Math.max(1, now - lastT); lastY = y; lastT = now;
-    panel.style.transition = "none";
-    panel.style.transform = `translateY(${dy}px)`;
-    sheet.style.transition = "none";
+    panel.style.transition = "none"; setY(`${dy}px`);
+    sheetBg.style.transition = "none";
+    sheetBg.style.opacity = String(Math.max(0, 1 - Math.max(0, dy) / panel.offsetHeight).toFixed(3));
   }, { passive: false });
   const end = () => {
     if (y0 == null) return;
@@ -1550,14 +1534,12 @@ sheet.addEventListener("click", e => { if (e.target === sheet) closeSheet(); });
     if (!dragging) return;
     justDragged = true; setTimeout(() => justDragged = false, 350);
     if (dy > panel.offsetHeight * .3 || (dy > 20 && vel > .45)) return closeSheet();
-    // snap back up
-    panel.style.transition = `transform .32s ${EASE}`;
-    panel.style.transform = "";
+    panel.style.transition = `transform .32s ${EASE}`; setY("0");
+    sheetBg.style.transition = "opacity .32s ease"; sheetBg.style.opacity = "1";
     sheetTimer = setTimeout(clearInline, 340);
   };
   sheet.addEventListener("touchend", end);
   sheet.addEventListener("touchcancel", end);
-  // a drag that ends on a tile must not also tap it
   sheet.addEventListener("click", e => { if (justDragged){ e.stopPropagation(); e.preventDefault(); } }, true);
 })();
 
