@@ -174,7 +174,8 @@ li .tags{display:flex;gap:6px}
 .badge{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff;transition:background .2s,color .2s,transform .3s cubic-bezier(.2,1.6,.4,1)}
 .badge svg{width:23px;height:23px}
 .act[aria-pressed="true"] .badge{background:#fff;color:var(--c);transform:scale(1.08) rotate(-6deg)}
-.sheet{position:fixed;inset:0;z-index:15;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0);transition:background .3s ease}
+html.locked,html.locked body{overflow:hidden;overscroll-behavior:none}
+.sheet{touch-action:none;overscroll-behavior:contain;position:fixed;inset:0;z-index:15;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0);transition:background .3s ease}
 .sheet.open{background:rgba(0,0,0,.42)}
 .sheet-panel{width:100%;max-width:560px;background:var(--surface);border-radius:26px 26px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .42s cubic-bezier(.2,.9,.25,1);will-change:transform}
 .sheet.open .sheet-panel{transform:none}
@@ -203,7 +204,7 @@ li .tags{display:flex;gap:6px}
 .foot{text-align:center;font-size:.7rem;color:var(--muted);opacity:.45;margin:24px 0 0;user-select:none;-webkit-user-select:none;cursor:default}
 .ex.shake{animation:shake .45s}
 @keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
-.cheer{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:24px;background:color-mix(in srgb,var(--bg) 50%,transparent);-webkit-backdrop-filter:blur(10px) saturate(1.2);backdrop-filter:blur(10px) saturate(1.2);opacity:0}
+.cheer{touch-action:none;overscroll-behavior:contain;position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:24px;background:color-mix(in srgb,var(--bg) 50%,transparent);-webkit-backdrop-filter:blur(10px) saturate(1.2);backdrop-filter:blur(10px) saturate(1.2);opacity:0}
 .cheer.show{animation:fadeIn .28s ease-out forwards}
 .cheer.out{animation:fadeOut .22s ease-in forwards}
 @keyframes fadeIn{to{opacity:1}}
@@ -278,6 +279,45 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
 .login section{width:100%;max-width:400px}
 .login .err{color:var(--down)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ===== feel: no double-tap zoom, springy presses ===== */
+html{touch-action:manipulation;-webkit-text-size-adjust:100%}
+button,a,.open,label.val{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+textarea,select,input{font-size:max(16px,1em)}
+.btn,.type,.seg button,.nav button,.stepper button,.bwstep button,.tabbar button,.del,.open,.save,.steps,.undo,.back,.ex,.cheer .btn{
+  transition:transform .32s cubic-bezier(.2,1.5,.4,1),background-color .22s ease,color .22s ease,border-color .22s ease,box-shadow .25s ease,opacity .2s ease}
+.btn:active:not(:disabled){transform:scale(.965)}
+.type:active{transform:scale(.92)}
+.seg button:active{transform:scale(.94)}
+.nav button:active:not(:disabled){transform:scale(.86)}
+.stepper button:active,.bwstep button:active{transform:scale(.86)}
+.tabbar button:active{transform:scale(.88)}
+.del:active,.undo:active{transform:scale(.92)}
+.open:active{transform:scale(.985)}
+.save:active{transform:scale(.93)}
+.steps:active{transform:scale(.98)}
+.back:active{transform:translateX(-4px)}
+.ex:has(.open:active){transform:scale(.99)}
+.type[aria-pressed="true"]{animation:pressPop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pressPop{0%{transform:scale(.88)}55%{transform:scale(1.06)}100%{transform:scale(1)}}
+.save.show:not(.done){animation:popIn .4s cubic-bezier(.2,1.6,.4,1)}
+.save.done,.del.sure{animation:popIn .4s cubic-bezier(.2,1.6,.4,1)}
+@keyframes popIn{0%{transform:scale(.75);opacity:0}100%{transform:scale(1);opacity:1}}
+.bump{animation:bump .32s cubic-bezier(.2,1.6,.4,1)}
+@keyframes bump{40%{transform:scale(1.14)}100%{transform:scale(1)}}
+.tabbar button svg{transition:transform .3s cubic-bezier(.2,1.5,.4,1)}
+.tabbar button[aria-selected="true"] svg{animation:tabHop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes tabHop{0%{transform:scale(.8)}50%{transform:translateY(-3px) scale(1.14)}100%{transform:none}}
+.seg{position:relative}
+.seg::before{content:"";position:absolute;top:4px;bottom:4px;left:0;width:var(--w,0);transform:translateX(var(--x,0));background:var(--surface);border-radius:7px;box-shadow:0 1px 4px rgba(0,0,0,.14);
+  transition:transform .42s cubic-bezier(.2,1.25,.3,1),width .42s cubic-bezier(.2,1.25,.3,1)}
+.seg.nojump::before{transition:none}
+.seg button{position:relative;z-index:1}
+.seg button[aria-selected="true"]{background:transparent!important;color:var(--ink)}
+#tab-sessions:not([hidden]),#tab-weights:not([hidden]),#tab-body:not([hidden]),#detail:not([hidden]){animation:fadeUp .32s ease both}
+#chart>div,#bwChart>svg{animation:fadeUp .35s ease both}
+@keyframes fadeUp{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -1427,22 +1467,45 @@ const sheet = document.getElementById("sheet");
 document.querySelectorAll(".badge").forEach(b => b.innerHTML = sportSvg(b.dataset.ic));
 syncPicks();
 function openSheet(){
+  document.documentElement.classList.add("locked");
   sheet.hidden = false;
   requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.add("open")));
 }
 function closeSheet(){
+  document.documentElement.classList.remove("locked");
   sheet.classList.remove("open");
   setTimeout(() => { if (!sheet.classList.contains("open")) sheet.hidden = true; }, 420);
 }
 document.getElementById("moreBtn").addEventListener("click", openSheet);
 document.getElementById("sheetDone").addEventListener("click", closeSheet);
 sheet.addEventListener("click", e => { if (e.target === sheet) closeSheet(); });
-// swipe the sheet down to close
+// swipe the sheet down to close: only the panel moves, the page stays put
 (() => {
-  const panel = sheet.querySelector(".sheet-panel"); let y0 = null, dy = 0;
-  panel.addEventListener("touchstart", e => { if (e.target.closest(".act,.btn")) return; y0 = e.touches[0].clientY; dy = 0; panel.style.transition = "none"; }, { passive: true });
-  panel.addEventListener("touchmove", e => { if (y0 == null) return; dy = Math.max(0, e.touches[0].clientY - y0); panel.style.transform = `translateY(${dy}px)`; }, { passive: true });
-  panel.addEventListener("touchend", () => { if (y0 == null) return; panel.style.transition = ""; panel.style.transform = ""; if (dy > 90) closeSheet(); y0 = null; });
+  const panel = sheet.querySelector(".sheet-panel");
+  let y0 = null, t0 = 0, dy = 0, dragging = false;
+  sheet.addEventListener("touchstart", e => {
+    y0 = e.touches[0].clientY; t0 = performance.now(); dy = 0; dragging = false;
+  }, { passive: true });
+  sheet.addEventListener("touchmove", e => {
+    e.preventDefault();                                   // never scroll the page behind
+    if (y0 == null) return;
+    const raw = e.touches[0].clientY - y0;
+    if (!dragging && Math.abs(raw) < 6) return;
+    dragging = true;
+    dy = raw > 0 ? raw : -Math.sqrt(-raw) * 3;            // stretchy when pulled up
+    panel.style.transition = "none";
+    panel.style.transform = `translateY(${dy}px)`;
+    sheet.style.background = `rgba(0,0,0,${0.42 * Math.max(0, 1 - Math.max(0, dy) / panel.offsetHeight)})`;
+  }, { passive: false });
+  const end = () => {
+    if (y0 == null) return;
+    const v = dy / Math.max(1, performance.now() - t0);   // px per ms
+    panel.style.transition = ""; panel.style.transform = ""; sheet.style.background = "";
+    if (dragging && (dy > panel.offsetHeight * .3 || (dy > 30 && v > .5))) closeSheet();
+    y0 = null;
+  };
+  sheet.addEventListener("touchend", end);
+  sheet.addEventListener("touchcancel", end);
 })();
 
 /* ---- steps (sent from an iPhone shortcut as #steps=1234) ---- */
@@ -1470,6 +1533,30 @@ document.getElementById("steps").addEventListener("click", () => {
 });
 readStepsLink();
 window.addEventListener("hashchange", () => { readStepsLink(); renderSteps(); });
+
+/* ===== feel: presses work on iPhone, number bumps, sliding tabs ===== */
+document.addEventListener("touchstart", () => {}, { passive: true });   // makes :active presses show on iOS
+document.addEventListener("click", e => {
+  const b = e.target.closest(".stepper button, .bwstep button");
+  if (!b) return;
+  const inp = b.closest(".stepper, .bwstep").querySelector("input");
+  inp.classList.remove("bump"); void inp.offsetWidth; inp.classList.add("bump");
+});
+function segPos(seg, instant){
+  const b = seg.querySelector('[aria-selected="true"]');
+  if (!b || !b.offsetWidth) return;
+  if (instant) seg.classList.add("nojump");
+  seg.style.setProperty("--x", b.offsetLeft + "px");
+  seg.style.setProperty("--w", b.offsetWidth + "px");
+  if (instant) requestAnimationFrame(() => requestAnimationFrame(() => seg.classList.remove("nojump")));
+}
+const allSegs = instant => document.querySelectorAll(".seg").forEach(sg => segPos(sg, instant));
+new MutationObserver(ms => ms.forEach(m => { const sg = m.target.closest(".seg"); if (sg) segPos(sg); }))
+  .observe(document.body, { subtree: true, attributes: true, attributeFilter: ["aria-selected", "hidden"] });
+document.querySelectorAll("main > div").forEach(d => new MutationObserver(() => requestAnimationFrame(() => allSegs(true))).observe(d, { attributes: true, attributeFilter: ["hidden"] }));
+addEventListener("resize", () => allSegs(true));
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => allSegs(true));
+allSegs(true);
 
 render();
 initSync();
