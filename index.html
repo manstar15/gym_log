@@ -20,21 +20,21 @@
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   --bg:#E4E5E1; --surface:#F5F5F2; --ink:#1E2124; --muted:#666B70; --line:#C9CBC5;
-  --push:#C8322D; --pull:#2456A6; --legs:#D9A514; --core:#2E8B57; --empty:#D4D6D0;
+  --push:#C8322D; --pull:#2456A6; --legs:#D9A514; --core:#2E8B57; --run:#E06A1B; --bike:#13918B; --tennis:#7FA21B; --box:#B5317F; --swim:#1C86C7; --empty:#D4D6D0;
   --up:#2E8B57; --down:#C8322D;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --bg:#17191B; --surface:#212427; --ink:#ECEDEA; --muted:#9BA0A4; --line:#34383C;
-    --push:#E0504A; --pull:#4A7FD6; --legs:#E8B935; --core:#3FAE6E; --empty:#2C3034;
+    --push:#E0504A; --pull:#4A7FD6; --legs:#E8B935; --core:#3FAE6E; --run:#F0843A; --bike:#2BB5AE; --tennis:#A5C93A; --box:#D9529F; --swim:#3FA6E6; --empty:#2C3034;
     --up:#4CC07F; --down:#E8635D;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#17191B; --surface:#212427; --ink:#ECEDEA; --muted:#9BA0A4; --line:#34383C;
-  --push:#E0504A; --pull:#4A7FD6; --legs:#E8B935; --core:#3FAE6E; --empty:#2C3034;
+  --push:#E0504A; --pull:#4A7FD6; --legs:#E8B935; --core:#3FAE6E; --run:#F0843A; --bike:#2BB5AE; --tennis:#A5C93A; --box:#D9529F; --swim:#3FA6E6; --empty:#2C3034;
   --up:#4CC07F; --down:#E8635D;
   color-scheme:dark;
 }
@@ -157,6 +157,40 @@ li .tags{display:flex;gap:6px}
 .tabbar button[aria-selected="true"]{color:var(--ink)}
 .tabbar svg{width:26px;height:26px}
 [hidden]{display:none!important}
+.morebtn{display:flex;align-items:center;gap:10px;width:100%;font:inherit;font-weight:600;color:var(--ink);background:var(--bg);border:2px dashed var(--line);border-radius:50px;padding:12px 18px;margin-bottom:8px;cursor:pointer;transition:border-color .2s,background .2s,transform .15s}
+.morebtn:active{transform:scale(.98)}
+.morebtn.has{border-style:solid;border-color:var(--ink);background:var(--surface)}
+.moreicons{font-size:1rem;white-space:nowrap;flex:none}
+#moreLabel{text-align:left;flex:1;min-width:0}
+.morebtn .chev{margin-left:auto;font-size:1.3rem;color:var(--muted)}
+.sheet{position:fixed;inset:0;z-index:15;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0);transition:background .3s ease}
+.sheet.open{background:rgba(0,0,0,.42)}
+.sheet-panel{width:100%;max-width:560px;background:var(--surface);border-radius:26px 26px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .42s cubic-bezier(.2,.9,.25,1);will-change:transform}
+.sheet.open .sheet-panel{transform:none}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+.sheet h2{margin:0 0 4px}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 16px}
+.act{font:inherit;font-weight:600;font-size:1.05rem;display:flex;align-items:center;gap:10px;padding:16px;border-radius:18px;border:2px solid transparent;background:var(--bg);color:var(--ink);cursor:pointer;transition:transform .18s cubic-bezier(.2,1.5,.4,1),background .2s,border-color .2s,color .2s}
+.act span{font-size:1.7rem;transition:transform .3s cubic-bezier(.2,1.6,.4,1)}
+.act.wide{grid-column:1/-1;justify-content:center}
+.act:active{transform:scale(.95)}
+.act[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff}
+.act[aria-pressed="true"] span{transform:scale(1.18) rotate(-6deg)}
+.sheet .act{opacity:0;transform:translateY(12px)}
+.sheet.open .act{opacity:1;transform:none;transition:opacity .35s ease,transform .45s cubic-bezier(.2,1.3,.4,1),background .2s,border-color .2s,color .2s}
+.sheet.open .act:nth-child(2){transition-delay:.04s,.04s,0s,0s,0s}
+.sheet.open .act:nth-child(3){transition-delay:.08s,.08s,0s,0s,0s}
+.sheet.open .act:nth-child(4){transition-delay:.12s,.12s,0s,0s,0s}
+.sheet.open .act:nth-child(5){transition-delay:.16s,.16s,0s,0s,0s}
+.sheet.open .act:active{transform:scale(.95)}
+.steps{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;width:100%;font:inherit;color:var(--ink);background:var(--surface);border:0;border-radius:14px;padding:10px 14px;margin:-6px 0 16px;text-align:left;cursor:pointer}
+.steps-ic{grid-row:1/3;font-size:1.4rem}
+.steps-txt{font-size:.95rem}
+.steps-txt b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:1.25rem;font-weight:800}
+.steps-txt span{color:var(--muted)}
+.steps-bar{height:5px;border-radius:3px;background:var(--empty);overflow:hidden;margin-top:4px}
+.steps-bar i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,var(--core),var(--legs));transition:width .9s cubic-bezier(.2,.9,.3,1)}
+@media (prefers-reduced-motion:reduce){.sheet,.sheet-panel,.act,.steps-bar i{transition:none!important}}
 .foot{text-align:center;font-size:.7rem;color:var(--muted);opacity:.45;margin:24px 0 0;user-select:none;-webkit-user-select:none;cursor:default}
 .ex.shake{animation:shake .45s}
 @keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
@@ -242,6 +276,12 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
   <!-- SESSIONS -->
   <div id="tab-sessions">
     <h1>Gym log</h1>
+    <button class="steps" id="steps" aria-label="Steps today">
+      <span class="steps-ic" aria-hidden="true">👟</span>
+      <span class="steps-txt"><b id="stepsNum">–</b> <span id="stepsSub">steps today</span></span>
+      <span class="steps-bar" aria-hidden="true"><i id="stepsFill"></i></span>
+    </button>
+    <p class="hint" id="stepsHelp" hidden>Steps come from your iPhone through a shortcut. Open your site from the “Gym log” shortcut and today’s steps update automatically.</p>
     <section aria-labelledby="logh">
       <h2 id="logh">Log a session</h2>
       <label class="field" for="date">Date</label>
@@ -252,7 +292,12 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
         <button class="type" data-t="legs" style="--c:var(--legs)" aria-pressed="false">Legs</button>
       </div>
       <button class="type extra" data-t="core" style="--c:var(--core)" aria-pressed="false">+ Core</button>
-      <p class="hint">Pick everything you trained. Add core if you did it too.</p>
+      <button class="morebtn" id="moreBtn" aria-haspopup="dialog">
+        <span class="moreicons" aria-hidden="true">🏃🚴🎾🥊🏊</span>
+        <span id="moreLabel">+ Cardio &amp; sports</span>
+        <span class="chev" aria-hidden="true">›</span>
+      </button>
+      <p class="hint">Pick everything you trained. Add core or a sport if you did it too.</p>
       <button class="btn" id="save" disabled>Log session</button>
       <div class="toast" id="toast" role="status"></div>
     </section>
@@ -379,6 +424,22 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
   </section>
 </div>
 
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-panel">
+    <div class="grab" aria-hidden="true"></div>
+    <h2 id="sheetTitle">Cardio &amp; sports</h2>
+    <p class="hint">Tap everything you did today. It goes into the same session.</p>
+    <div class="acts">
+      <button class="act" data-t="run" style="--c:var(--run)" aria-pressed="false"><span>🏃</span>Run</button>
+      <button class="act" data-t="bike" style="--c:var(--bike)" aria-pressed="false"><span>🚴</span>Bicycle</button>
+      <button class="act" data-t="tennis" style="--c:var(--tennis)" aria-pressed="false"><span>🎾</span>Tennis</button>
+      <button class="act" data-t="box" style="--c:var(--box)" aria-pressed="false"><span>🥊</span>Boxing</button>
+      <button class="act wide" data-t="swim" style="--c:var(--swim)" aria-pressed="false"><span>🏊</span>Swimming</button>
+    </div>
+    <button class="btn" id="sheetDone">Done</button>
+  </div>
+</div>
+
 <div class="cheer" id="cheer" hidden role="dialog" aria-live="polite">
   <canvas id="confetti" aria-hidden="true"></canvas>
   <div class="cheer-card">
@@ -456,8 +517,10 @@ function showTab(t){
 
 /* ================= sessions ================= */
 const KEY = "gymlog.v1";
-const TYPES = { push:"Push", pull:"Pull", legs:"Legs", core:"Core" };
-const ORDER = ["push","pull","legs","core"];
+const TYPES = { push:"Push", pull:"Pull", legs:"Legs", core:"Core", run:"Run", bike:"Bicycle", tennis:"Tennis", box:"Boxing", swim:"Swimming" };
+const ORDER = ["push","pull","legs","core","run","bike","tennis","box","swim"];
+const EXTRA = ["run","bike","tennis","box","swim"];
+const ICON = { run:"🏃", bike:"🚴", tennis:"🎾", box:"🥊", swim:"🏊" };
 let entries = store(KEY, []);
 let view = "week", anchor = new Date(), picked = [];
 
@@ -472,12 +535,18 @@ const stripes = types => types.map(t => `<i style="background:var(--${t})"></i>`
 
 const dateInput = document.getElementById("date");
 dateInput.value = iso(new Date());
-document.querySelectorAll(".type").forEach(b => b.addEventListener("click", () => {
+document.querySelectorAll(".type, .act").forEach(b => b.addEventListener("click", () => {
   const t = b.dataset.t;
   picked = picked.includes(t) ? picked.filter(x => x !== t) : [...picked, t];
   syncPicks();
 }));
 function syncPicks(){
+  document.querySelectorAll(".act").forEach(b => b.setAttribute("aria-pressed", picked.includes(b.dataset.t)));
+  const ex = EXTRA.filter(t => picked.includes(t));
+  const mb = document.getElementById("moreBtn");
+  mb.classList.toggle("has", ex.length > 0);
+  document.getElementById("moreLabel").textContent = ex.length ? ex.map(t => TYPES[t]).join(" + ") : "+ Cardio & sports";
+  document.getElementById("sheetDone").textContent = ex.length ? `Add ${ex.length === 1 ? TYPES[ex[0]] : ex.length + " activities"}` : "Done";
   document.querySelectorAll(".type").forEach(b => b.setAttribute("aria-pressed", picked.includes(b.dataset.t)));
   document.getElementById("save").disabled = picked.length === 0 || !dateInput.value;
 }
@@ -512,6 +581,7 @@ function step(n){
   render();
 }
 function render(){
+  renderSteps();
   const [s,e] = range(), list = inRange(), map = byDate(list), today = iso(new Date());
   let label;
   if (view === "week"){
@@ -536,20 +606,20 @@ function render(){
       html += `<div class="cell${t.length?" on":""}"><em>${d}</em>${stripes(t)}</div>`; }
     html += `</div>`;
   } else {
-    const counts = MONTHS.map((_,m) => { const c = {push:0,pull:0,legs:0,core:0,n:0};
+    const counts = MONTHS.map((_,m) => { const c = { n:0 }; ORDER.forEach(t => c[t] = 0);
       list.forEach(x => { if (parse(x.date).getMonth() === m){ c.n++; x.types.forEach(t => c[t]++); } }); return c; });
     const max = Math.max(1, ...counts.map(c => c.n));
     html = `<div class="year">` + counts.map((c,m) => {
-      const h = Math.round((c.n/max)*90), tot = c.push + c.pull + c.legs + c.core || 1;
+      const h = Math.round((c.n/max)*90), tot = ORDER.reduce((a,t) => a + c[t], 0) || 1;
       const segs = ORDER.map(t => c[t] ? `<i style="display:block;flex:${c[t]/tot};background:var(--${t})"></i>` : "").join("");
       return `<div class="ycol"><span class="n">${c.n||""}</span><div class="stack" style="height:${c.n?h:2}px">${segs}</div><small>${MONTHS[m][0]}</small></div>`;
     }).join("") + `</div>`;
   }
   document.getElementById("chart").innerHTML = html;
 
-  const tally = {push:0,pull:0,legs:0,core:0};
+  const tally = {}; ORDER.forEach(t => tally[t] = 0);
   list.forEach(x => x.types.forEach(t => tally[t]++));
-  document.getElementById("split").innerHTML = ORDER.map(t => `<div><span class="dot" style="--c:var(--${t})"></span>${TYPES[t]} ${tally[t]}</div>`).join("");
+  document.getElementById("split").innerHTML = ORDER.filter(t => !EXTRA.includes(t) || tally[t]).map(t => `<div><span class="dot" style="--c:var(--${t})"></span>${TYPES[t]} ${tally[t]}</div>`).join("");
 
   const ul = document.getElementById("list");
   if (!list.length){ ul.innerHTML = `<p class="empty">Nothing logged in this ${view} yet.</p>`; return; }
@@ -719,6 +789,11 @@ const CHEERS = {
   pull: [["🦅","Back day in the books"],["🪽","Those wings are growing"],["🎯","You pulled it off"],["🧗","Every rep builds that back"]],
   legs: [["🦵","You didn’t skip leg day"],["🏔️","Strongest base in the gym"],["🪜","Stairs are scary now. Worth it."],["🌋","Legs fully fried"]],
   core: [["🧱","Core locked in"],["🎯","Abs are built like this"],["⚙️","Stronger from the center out"],["🔒","Rock-solid core +1"]],
+  run:  [["🏃","Miles in the bank"],["💨","Lungs of steel loading"],["🔥","Run done. Heart says thanks"]],
+  bike: [["🚴","Wheels turned, legs burned"],["⛰️","Pedal power unlocked"],["💨","Another ride in the books"]],
+  tennis:[["🎾","Game, set, match"],["⚡","Fast feet, faster swings"],["🏆","Court time well spent"]],
+  box:  [["🥊","Float like a butterfly"],["💥","Hands are getting heavy"],["🔥","Rounds done. Respect."]],
+  swim: [["🏊","Laps done, lungs strong"],["🌊","Smooth in the water"],["💧","Full-body workout, no splash wasted"]],
 };
 const lastCheer = {};
 function pickCheer(kind){
@@ -1324,6 +1399,53 @@ go.addEventListener("click", () => {
   hint.textContent = `Restored. You now have ${entries.length} sessions saved.`;
   go.hidden = true;
 });
+
+/* ---- cardio & sports sheet ---- */
+const sheet = document.getElementById("sheet");
+function openSheet(){
+  sheet.hidden = false;
+  requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.add("open")));
+}
+function closeSheet(){
+  sheet.classList.remove("open");
+  setTimeout(() => { if (!sheet.classList.contains("open")) sheet.hidden = true; }, 420);
+}
+document.getElementById("moreBtn").addEventListener("click", openSheet);
+document.getElementById("sheetDone").addEventListener("click", closeSheet);
+sheet.addEventListener("click", e => { if (e.target === sheet) closeSheet(); });
+// swipe the sheet down to close
+(() => {
+  const panel = sheet.querySelector(".sheet-panel"); let y0 = null, dy = 0;
+  panel.addEventListener("touchstart", e => { if (e.target.closest(".act,.btn")) return; y0 = e.touches[0].clientY; dy = 0; panel.style.transition = "none"; }, { passive: true });
+  panel.addEventListener("touchmove", e => { if (y0 == null) return; dy = Math.max(0, e.touches[0].clientY - y0); panel.style.transform = `translateY(${dy}px)`; }, { passive: true });
+  panel.addEventListener("touchend", () => { if (y0 == null) return; panel.style.transition = ""; panel.style.transform = ""; if (dy > 90) closeSheet(); y0 = null; });
+})();
+
+/* ---- steps (sent from an iPhone shortcut as #steps=1234) ---- */
+const STEP_GOAL = 10000;
+function renderSteps(){
+  const rec = (lifts.__steps || []).find(x => x.id === iso(new Date()));
+  document.getElementById("stepsNum").textContent = rec ? rec.n.toLocaleString("en-US") : "–";
+  document.getElementById("stepsSub").textContent = rec ? `steps today, updated ${hhmm(rec.t)}` : "steps today. Tap to connect";
+  requestAnimationFrame(() => document.getElementById("stepsFill").style.width = rec ? `${Math.min(100, rec.n / STEP_GOAL * 100)}%` : "0");
+}
+function readStepsLink(){
+  const m = location.hash.match(/^#steps=([\d.,]+)/);
+  if (!m) return;
+  history.replaceState(null, "", location.pathname);
+  const n = Math.round(parseFloat(m[1].replace(/,/g, "")));
+  if (isNaN(n)) return;
+  const today = iso(new Date()), d = new Date();
+  const list = (lifts.__steps || []).filter(x => x.id !== today && x.id >= iso(addDays(d, -60)));
+  list.push({ id: today, n, t: d.getHours() * 60 + d.getMinutes() });
+  lifts.__steps = list;
+  saveAll();
+}
+document.getElementById("steps").addEventListener("click", () => {
+  const h = document.getElementById("stepsHelp"); h.hidden = !h.hidden;
+});
+readStepsLink();
+window.addEventListener("hashchange", () => { readStepsLink(); renderSteps(); });
 
 render();
 initSync();
