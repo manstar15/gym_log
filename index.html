@@ -174,13 +174,34 @@ li .tags{display:flex;gap:6px}
 .badge svg{width:23px;height:23px}
 .act[aria-pressed="true"] .badge{background:#fff;color:var(--c)}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 16px}
-#sportsView:not([hidden]){animation:slideIn .32s cubic-bezier(.32,.72,0,1) backwards}
-@keyframes slideIn{from{transform:translateX(28px);opacity:0}to{transform:none;opacity:1}}
-#sportsView h1{margin-bottom:4px}
-#sportsView .act{background:var(--surface);min-height:84px}
-#sportsView .act[aria-pressed="true"]{background:var(--c)}
-#sportsView .act:active{background-color:color-mix(in srgb,var(--ink) 8%,var(--surface))}
-#sportsView .act[aria-pressed="true"]:active{background-color:color-mix(in srgb,#000 15%,var(--c))}
+#sportsView:not([hidden]){animation:slideIn .34s cubic-bezier(.32,.72,0,1) backwards}
+@keyframes slideIn{from{transform:translateX(32px);opacity:0}to{transform:none;opacity:1}}
+.sv-top{display:flex;align-items:center;justify-content:space-between;margin:2px 0 14px}
+.sv-back{width:42px;height:42px;border-radius:50%;border:0;background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.sv-back svg{width:20px;height:20px}
+.sv-count{font-size:.85rem;font-weight:600;color:var(--muted);background:var(--surface);padding:6px 12px;border-radius:20px}
+.sv-count.on{color:var(--ink)}
+.sv-title{font-size:2.6rem;margin:0 0 4px}
+#sportsView .acts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0 18px}
+#sportsView .act{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:18px;min-height:150px;padding:16px;border-radius:24px;border:2px solid transparent;
+  background:var(--surface);color:var(--ink);text-align:left;font:inherit;cursor:pointer;overflow:hidden;transition:background-color .18s,border-color .18s}
+#sportsView .act::before{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:var(--c);opacity:.10;pointer-events:none}
+#sportsView .act.wide{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:flex-start;min-height:96px;gap:14px}
+#sportsView .badge{width:52px;height:52px}
+#sportsView .badge svg{width:28px;height:28px}
+.acttxt{display:flex;flex-direction:column;line-height:1.15}
+.acttxt b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:1.55rem;letter-spacing:.01em}
+.acttxt small{font-size:.8rem;color:var(--muted);margin-top:3px}
+.tick{position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--bg);color:transparent;border:2px solid var(--line);transition:background-color .18s,border-color .18s,color .18s}
+.tick svg{width:15px;height:15px}
+#sportsView .act[aria-pressed="true"]{background:color-mix(in srgb,var(--c) 20%,var(--surface));border-color:var(--c)}
+#sportsView .act[aria-pressed="true"] .badge{background:var(--c);color:#fff}
+#sportsView .act[aria-pressed="true"] .tick{background:var(--c);border-color:var(--c);color:#fff}
+#sportsView .act[aria-pressed="true"] .acttxt small{color:var(--ink);opacity:.75}
+#sportsView .act:active{background-color:color-mix(in srgb,var(--ink) 6%,var(--surface))}
+#sportsView .act[aria-pressed="true"]:active{background-color:color-mix(in srgb,var(--c) 28%,var(--surface))}
+.sv-bar{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));padding-top:8px;z-index:2}
+.sv-bar .btn{box-shadow:0 10px 30px -10px rgba(0,0,0,.5);padding:16px;font-size:1.05rem}
 .act{font:inherit;font-weight:600;font-size:1.05rem;display:flex;align-items:center;gap:10px;padding:16px;border-radius:18px;border:2px solid transparent;background:var(--bg);color:var(--ink);cursor:pointer;transition:background-color .15s,border-color .15s,color .15s}
 .act.wide{grid-column:1/-1;justify-content:center}
 .act:active{background-color:color-mix(in srgb,var(--ink) 10%,var(--bg))}
@@ -446,17 +467,40 @@ main{position:relative;z-index:0;isolation:isolate}
 
   <!-- CARDIO & SPORTS PICKER -->
   <div id="sportsView" hidden>
-    <button class="back" id="sportsBack">‹ Log a session</button>
-    <h1>Cardio &amp; sports</h1>
-    <p class="hint">Tap everything you did today. It goes into the same session.</p>
-    <div class="acts">
-      <button class="act" data-t="run" style="--c:var(--run)" aria-pressed="false"><span class="badge" data-ic="run"></span>Run</button>
-      <button class="act" data-t="bike" style="--c:var(--bike)" aria-pressed="false"><span class="badge" data-ic="bike"></span>Bicycle</button>
-      <button class="act" data-t="tennis" style="--c:var(--tennis)" aria-pressed="false"><span class="badge" data-ic="tennis"></span>Tennis</button>
-      <button class="act" data-t="box" style="--c:var(--box)" aria-pressed="false"><span class="badge" data-ic="box"></span>Boxing</button>
-      <button class="act wide" data-t="swim" style="--c:var(--swim)" aria-pressed="false"><span class="badge" data-ic="swim"></span>Swimming</button>
+    <div class="sv-top">
+      <button class="sv-back" id="sportsBack" aria-label="Back to log a session"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <span class="sv-count" id="svCount">Nothing picked yet</span>
     </div>
-    <button class="btn" id="sheetDone">Done</button>
+    <h1 class="sv-title">Cardio &amp; sports</h1>
+    <p class="hint">Tap everything you did today. It all goes into the same session.</p>
+    <div class="acts">
+      <button class="act" data-t="run" style="--c:var(--run)" aria-pressed="false">
+        <span class="badge" data-ic="run"></span>
+        <span class="acttxt"><b>Run</b><small>Outdoor or treadmill</small></span>
+        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
+      </button>
+      <button class="act" data-t="bike" style="--c:var(--bike)" aria-pressed="false">
+        <span class="badge" data-ic="bike"></span>
+        <span class="acttxt"><b>Bicycle</b><small>Road or stationary</small></span>
+        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
+      </button>
+      <button class="act" data-t="tennis" style="--c:var(--tennis)" aria-pressed="false">
+        <span class="badge" data-ic="tennis"></span>
+        <span class="acttxt"><b>Tennis</b><small>Singles or doubles</small></span>
+        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
+      </button>
+      <button class="act" data-t="box" style="--c:var(--box)" aria-pressed="false">
+        <span class="badge" data-ic="box"></span>
+        <span class="acttxt"><b>Boxing</b><small>Bag or sparring</small></span>
+        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
+      </button>
+      <button class="act wide" data-t="swim" style="--c:var(--swim)" aria-pressed="false">
+        <span class="badge" data-ic="swim"></span>
+        <span class="acttxt"><b>Swimming</b><small>Pool or open water</small></span>
+        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
+      </button>
+    </div>
+    <div class="sv-bar"><button class="btn" id="sheetDone">Done</button></div>
   </div>
 
   <!-- EXERCISE DETAIL -->
@@ -615,6 +659,8 @@ function syncPicks(){
     ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`
     : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
   document.getElementById("sheetDone").textContent = ex.length ? `Add ${ex.length === 1 ? TYPES[ex[0]] : ex.length + " activities"}` : "Done";
+  const cnt = document.getElementById("svCount");
+  if (cnt){ cnt.textContent = ex.length ? `${ex.length} picked` : "Nothing picked yet"; cnt.classList.toggle("on", ex.length > 0); }
   document.querySelectorAll(".type").forEach(b => b.setAttribute("aria-pressed", picked.includes(b.dataset.t)));
   document.getElementById("save").disabled = picked.length === 0 || !dateInput.value;
 }
@@ -1538,7 +1584,7 @@ function readStepsLink(){
   saveAll();
 }
 // runs the "Gym log" shortcut, which reads Health and opens the site with today's steps
-const SHORTCUT_NAME = "Gym log";
+const SHORTCUT_NAME = "Gym Log";   // must match the shortcut name exactly, capitals included
 document.getElementById("stepsUpd").addEventListener("click", e => {
   const b = e.currentTarget;
   b.classList.remove("spin"); void b.offsetWidth; b.classList.add("spin");
