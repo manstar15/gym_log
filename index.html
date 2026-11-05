@@ -157,12 +157,23 @@ li .tags{display:flex;gap:6px}
 .tabbar button[aria-selected="true"]{color:var(--ink)}
 .tabbar svg{width:26px;height:26px}
 [hidden]{display:none!important}
-.morebtn{display:flex;align-items:center;gap:10px;width:100%;font:inherit;font-weight:600;color:var(--ink);background:var(--bg);border:2px dashed var(--line);border-radius:50px;padding:12px 18px;margin-bottom:8px;cursor:pointer;transition:border-color .2s,background .2s,transform .15s}
+.morebtn{--c:var(--line);display:flex;align-items:center;gap:10px;width:100%;font:inherit;color:var(--ink);text-align:left;background:var(--bg);border:1.5px solid var(--line);border-radius:18px;padding:12px 12px 12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .25s,background .25s,transform .18s cubic-bezier(.2,1.5,.4,1),box-shadow .25s}
 .morebtn:active{transform:scale(.98)}
-.morebtn.has{border-style:solid;border-color:var(--ink);background:var(--surface)}
-.moreicons{font-size:1rem;white-space:nowrap;flex:none}
-#moreLabel{text-align:left;flex:1;min-width:0}
-.morebtn .chev{margin-left:auto;font-size:1.3rem;color:var(--muted)}
+.morebtn.has{border-color:var(--c);background:color-mix(in srgb,var(--c) 9%,var(--surface));box-shadow:0 6px 18px -10px var(--c)}
+.stack{display:flex;flex:none;padding-left:7px}
+.stack i{width:27px;height:27px;margin-left:-7px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;box-shadow:0 0 0 2.5px var(--bg);transition:transform .3s cubic-bezier(.2,1.5,.4,1)}
+.morebtn.has .stack i{box-shadow:0 0 0 2.5px color-mix(in srgb,var(--c) 9%,var(--surface))}
+.stack i svg{width:15px;height:15px}
+.morebtn:hover .stack i:nth-child(odd){transform:translateY(-2px)}
+.morebody{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}
+.morebody b{font-weight:600;font-size:.97rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.morebody small{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.plusc{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--surface);color:var(--ink);transition:background .25s,color .25s}
+.plusc svg{width:18px;height:18px}
+.morebtn.has .plusc{background:var(--c);color:#fff}
+.badge{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff;transition:background .2s,color .2s,transform .3s cubic-bezier(.2,1.6,.4,1)}
+.badge svg{width:23px;height:23px}
+.act[aria-pressed="true"] .badge{background:#fff;color:var(--c);transform:scale(1.08) rotate(-6deg)}
 .sheet{position:fixed;inset:0;z-index:15;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0);transition:background .3s ease}
 .sheet.open{background:rgba(0,0,0,.42)}
 .sheet-panel{width:100%;max-width:560px;background:var(--surface);border-radius:26px 26px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .42s cubic-bezier(.2,.9,.25,1);will-change:transform}
@@ -171,11 +182,9 @@ li .tags{display:flex;gap:6px}
 .sheet h2{margin:0 0 4px}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 16px}
 .act{font:inherit;font-weight:600;font-size:1.05rem;display:flex;align-items:center;gap:10px;padding:16px;border-radius:18px;border:2px solid transparent;background:var(--bg);color:var(--ink);cursor:pointer;transition:transform .18s cubic-bezier(.2,1.5,.4,1),background .2s,border-color .2s,color .2s}
-.act span{font-size:1.7rem;transition:transform .3s cubic-bezier(.2,1.6,.4,1)}
 .act.wide{grid-column:1/-1;justify-content:center}
 .act:active{transform:scale(.95)}
 .act[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff}
-.act[aria-pressed="true"] span{transform:scale(1.18) rotate(-6deg)}
 .sheet .act{opacity:0;transform:translateY(12px)}
 .sheet.open .act{opacity:1;transform:none;transition:opacity .35s ease,transform .45s cubic-bezier(.2,1.3,.4,1),background .2s,border-color .2s,color .2s}
 .sheet.open .act:nth-child(2){transition-delay:.04s,.04s,0s,0s,0s}
@@ -293,9 +302,9 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
       </div>
       <button class="type extra" data-t="core" style="--c:var(--core)" aria-pressed="false">+ Core</button>
       <button class="morebtn" id="moreBtn" aria-haspopup="dialog">
-        <span class="moreicons" aria-hidden="true">🏃🚴🎾🥊🏊</span>
-        <span id="moreLabel">+ Cardio &amp; sports</span>
-        <span class="chev" aria-hidden="true">›</span>
+        <span class="stack" id="moreStack"></span>
+        <span class="morebody"><b id="moreLabel">Cardio &amp; sports</b><small id="moreSub">Tap to add to this session</small></span>
+        <span class="plusc" id="morePlus" aria-hidden="true"></span>
       </button>
       <p class="hint">Pick everything you trained. Add core or a sport if you did it too.</p>
       <button class="btn" id="save" disabled>Log session</button>
@@ -430,11 +439,11 @@ textarea{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;color:va
     <h2 id="sheetTitle">Cardio &amp; sports</h2>
     <p class="hint">Tap everything you did today. It goes into the same session.</p>
     <div class="acts">
-      <button class="act" data-t="run" style="--c:var(--run)" aria-pressed="false"><span>🏃</span>Run</button>
-      <button class="act" data-t="bike" style="--c:var(--bike)" aria-pressed="false"><span>🚴</span>Bicycle</button>
-      <button class="act" data-t="tennis" style="--c:var(--tennis)" aria-pressed="false"><span>🎾</span>Tennis</button>
-      <button class="act" data-t="box" style="--c:var(--box)" aria-pressed="false"><span>🥊</span>Boxing</button>
-      <button class="act wide" data-t="swim" style="--c:var(--swim)" aria-pressed="false"><span>🏊</span>Swimming</button>
+      <button class="act" data-t="run" style="--c:var(--run)" aria-pressed="false"><span class="badge" data-ic="run"></span>Run</button>
+      <button class="act" data-t="bike" style="--c:var(--bike)" aria-pressed="false"><span class="badge" data-ic="bike"></span>Bicycle</button>
+      <button class="act" data-t="tennis" style="--c:var(--tennis)" aria-pressed="false"><span class="badge" data-ic="tennis"></span>Tennis</button>
+      <button class="act" data-t="box" style="--c:var(--box)" aria-pressed="false"><span class="badge" data-ic="box"></span>Boxing</button>
+      <button class="act wide" data-t="swim" style="--c:var(--swim)" aria-pressed="false"><span class="badge" data-ic="swim"></span>Swimming</button>
     </div>
     <button class="btn" id="sheetDone">Done</button>
   </div>
@@ -520,7 +529,13 @@ const KEY = "gymlog.v1";
 const TYPES = { push:"Push", pull:"Pull", legs:"Legs", core:"Core", run:"Run", bike:"Bicycle", tennis:"Tennis", box:"Boxing", swim:"Swimming" };
 const ORDER = ["push","pull","legs","core","run","bike","tennis","box","swim"];
 const EXTRA = ["run","bike","tennis","box","swim"];
-const ICON = { run:"🏃", bike:"🚴", tennis:"🎾", box:"🥊", swim:"🏊" };
+const SPORT_IC = {
+run:'<circle cx="15" cy="4.5" r="2"/><path d="M13 8l-2 6M11 14l-3 3H5M11 14l3 3v4M13 9l-4 1-2 3M13 9l3 3h3"/>',
+bike:'<circle cx="6" cy="16" r="3.6"/><circle cx="18" cy="16" r="3.6"/><path d="M6 16l3.5-7h6L18 16M9.5 9l3 7H6M15.5 9L14 5.5h2.5M8 6.5h3"/>',
+tennis:'<circle cx="12" cy="12" r="8.5"/><path d="M6 6c3 3 3 9 0 12M18 6c-3 3-3 9 0 12"/>',
+box:'<path d="M8 9.5A5.5 5.5 0 0 1 13.5 4h0A5.5 5.5 0 0 1 19 9.5V13a5 5 0 0 1-5 5h-3a3 3 0 0 1-3-3z"/><path d="M8 11H6.8a2 2 0 0 0 0 4H8M9 18v3h8.5v-3M12.5 8.5c1.6 0 3 1 3 2.6"/>',
+swim:'<circle cx="16.5" cy="6" r="2"/><path d="M4 12.5l5-3.5 3.5 2.5 3.5-2M2.5 16.5c1.6 0 1.6-1.2 3.2-1.2s1.6 1.2 3.2 1.2 1.6-1.2 3.2-1.2 1.6 1.2 3.2 1.2 1.6-1.2 3.2-1.2 1.6 1.2 2 1.2M2.5 20.5c1.6 0 1.6-1.2 3.2-1.2s1.6 1.2 3.2 1.2 1.6-1.2 3.2-1.2 1.6 1.2 3.2 1.2 1.6-1.2 3.2-1.2 1.6 1.2 2 1.2"/>'};
+const sportSvg = t => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SPORT_IC[t]}</svg>`;
 let entries = store(KEY, []);
 let view = "week", anchor = new Date(), picked = [];
 
@@ -545,7 +560,14 @@ function syncPicks(){
   const ex = EXTRA.filter(t => picked.includes(t));
   const mb = document.getElementById("moreBtn");
   mb.classList.toggle("has", ex.length > 0);
-  document.getElementById("moreLabel").textContent = ex.length ? ex.map(t => TYPES[t]).join(" + ") : "+ Cardio & sports";
+  mb.style.setProperty("--c", ex.length ? `var(--${ex[0]})` : "var(--line)");
+  const show = ex.length ? ex : EXTRA;
+  document.getElementById("moreStack").innerHTML = show.map((t, i) => `<i style="--c:var(--${t});z-index:${i + 1}">${sportSvg(t)}</i>`).join("");
+  document.getElementById("moreLabel").textContent = ex.length ? ex.map(t => TYPES[t]).join(" + ") : "Cardio & sports";
+  document.getElementById("moreSub").textContent = ex.length ? "Tap to change" : "Tap to add to this session";
+  document.getElementById("morePlus").innerHTML = ex.length
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
   document.getElementById("sheetDone").textContent = ex.length ? `Add ${ex.length === 1 ? TYPES[ex[0]] : ex.length + " activities"}` : "Done";
   document.querySelectorAll(".type").forEach(b => b.setAttribute("aria-pressed", picked.includes(b.dataset.t)));
   document.getElementById("save").disabled = picked.length === 0 || !dateInput.value;
@@ -1402,6 +1424,8 @@ go.addEventListener("click", () => {
 
 /* ---- cardio & sports sheet ---- */
 const sheet = document.getElementById("sheet");
+document.querySelectorAll(".badge").forEach(b => b.innerHTML = sportSvg(b.dataset.ic));
+syncPicks();
 function openSheet(){
   sheet.hidden = false;
   requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.add("open")));
