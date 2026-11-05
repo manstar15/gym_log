@@ -176,6 +176,7 @@ li .tags{display:flex;gap:6px}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 16px}
 #sportsView:not([hidden]){animation:slideIn .34s cubic-bezier(.32,.72,0,1) backwards}
 @keyframes slideIn{from{transform:translateX(32px);opacity:0}to{transform:none;opacity:1}}
+#sportsView{min-height:calc(100vh - 40px);min-height:calc(100dvh - 40px)}
 .sv-top{display:flex;align-items:center;justify-content:space-between;margin:2px 0 14px}
 .sv-back{width:42px;height:42px;border-radius:50%;border:0;background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}
 .sv-back svg{width:20px;height:20px}
@@ -1524,9 +1525,9 @@ const sportsView = document.getElementById("sportsView");
 let sportsScroll = 0;
 function openSports(){
   sportsScroll = window.scrollY;
+  window.scrollTo(0, 0);
   document.getElementById("tab-sessions").hidden = true;
   sportsView.hidden = false;
-  window.scrollTo(0, 0);
 }
 function closeSports(){
   if (sportsView.hidden) return;
@@ -1555,7 +1556,7 @@ async function fetchSteps(){
     // read it loosely: curly quotes, "3,493 steps", any date format
     const raw = dec((await r.json()).content).replace(/[“”„″]/g, '"');
     const nm = raw.match(/"n"\s*:\s*"?\s*([\d.,]+)/);
-    if (!nm) return;
+    if (!nm || /"d"\s*:\s*""/.test(raw)) return;         // still the empty placeholder: the shortcut hasn't saved yet
     const n = Math.round(parseFloat(nm[1].replace(/,/g, "")));
     // when was it saved? use the date inside if it's clear, otherwise ask GitHub when the file last changed
     let when = null;
