@@ -173,15 +173,14 @@ li .tags{display:flex;gap:6px}
 .badge{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff;transition:background .2s,color .2s}
 .badge svg{width:23px;height:23px}
 .act[aria-pressed="true"] .badge{background:#fff;color:var(--c)}
-dialog.sheet{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;background:transparent;color:inherit;touch-action:none;overscroll-behavior:contain;outline:0}
-dialog.sheet:not([open]){display:none}
-dialog.sheet::backdrop{background:rgba(0,0,0,.45);opacity:0;transition:opacity .3s ease}
-dialog.sheet.up::backdrop{opacity:1}
-.sheet-panel{position:absolute;left:0;right:0;bottom:0;margin:0 auto;width:100%;max-width:560px;background:var(--surface);border-radius:26px 26px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom,0px));-webkit-transform:translate3d(0,105%,0);transform:translate3d(0,105%,0);transition:transform .36s cubic-bezier(.32,.72,0,1)}
-.sheet.up .sheet-panel{-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}
-.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
-.sheet h2{margin:0 0 4px}
-.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 16px}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 16px}
+#sportsView:not([hidden]){animation:slideIn .32s cubic-bezier(.32,.72,0,1) backwards}
+@keyframes slideIn{from{transform:translateX(28px);opacity:0}to{transform:none;opacity:1}}
+#sportsView h1{margin-bottom:4px}
+#sportsView .act{background:var(--surface);min-height:84px}
+#sportsView .act[aria-pressed="true"]{background:var(--c)}
+#sportsView .act:active{background-color:color-mix(in srgb,var(--ink) 8%,var(--surface))}
+#sportsView .act[aria-pressed="true"]:active{background-color:color-mix(in srgb,#000 15%,var(--c))}
 .act{font:inherit;font-weight:600;font-size:1.05rem;display:flex;align-items:center;gap:10px;padding:16px;border-radius:18px;border:2px solid transparent;background:var(--bg);color:var(--ink);cursor:pointer;transition:background-color .15s,border-color .15s,color .15s}
 .act.wide{grid-column:1/-1;justify-content:center}
 .act:active{background-color:color-mix(in srgb,var(--ink) 10%,var(--bg))}
@@ -201,7 +200,6 @@ dialog.sheet.up::backdrop{opacity:1}
 .steps-txt span{color:var(--muted)}
 .steps-bar{height:5px;border-radius:3px;background:var(--empty);overflow:hidden;margin-top:4px}
 .steps-bar i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,var(--core),var(--legs));transition:width .9s cubic-bezier(.2,.9,.3,1)}
-@media (prefers-reduced-motion:reduce){.sheet,.sheet-panel,.act,.steps-bar i{transition:none!important}}
 .foot{text-align:center;font-size:.7rem;color:var(--muted);opacity:.45;margin:24px 0 0;user-select:none;-webkit-user-select:none;cursor:default}
 .ex.shake{animation:shake .45s}
 @keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
@@ -349,7 +347,7 @@ main{position:relative;z-index:0;isolation:isolate}
         <button class="type" data-t="legs" style="--c:var(--legs)" aria-pressed="false">Legs</button>
       </div>
       <button class="type extra" data-t="core" style="--c:var(--core)" aria-pressed="false">+ Core</button>
-      <button class="morebtn" id="moreBtn" aria-haspopup="dialog">
+      <button class="morebtn" id="moreBtn">
         <span class="sstack" id="moreStack"></span>
         <span class="morebody"><b id="moreLabel">Cardio &amp; sports</b><small id="moreSub">Tap to add to this session</small></span>
         <span class="plusc" id="morePlus" aria-hidden="true"></span>
@@ -446,6 +444,21 @@ main{position:relative;z-index:0;isolation:isolate}
     </section>
   </div>
 
+  <!-- CARDIO & SPORTS PICKER -->
+  <div id="sportsView" hidden>
+    <button class="back" id="sportsBack">‹ Log a session</button>
+    <h1>Cardio &amp; sports</h1>
+    <p class="hint">Tap everything you did today. It goes into the same session.</p>
+    <div class="acts">
+      <button class="act" data-t="run" style="--c:var(--run)" aria-pressed="false"><span class="badge" data-ic="run"></span>Run</button>
+      <button class="act" data-t="bike" style="--c:var(--bike)" aria-pressed="false"><span class="badge" data-ic="bike"></span>Bicycle</button>
+      <button class="act" data-t="tennis" style="--c:var(--tennis)" aria-pressed="false"><span class="badge" data-ic="tennis"></span>Tennis</button>
+      <button class="act" data-t="box" style="--c:var(--box)" aria-pressed="false"><span class="badge" data-ic="box"></span>Boxing</button>
+      <button class="act wide" data-t="swim" style="--c:var(--swim)" aria-pressed="false"><span class="badge" data-ic="swim"></span>Swimming</button>
+    </div>
+    <button class="btn" id="sheetDone">Done</button>
+  </div>
+
   <!-- EXERCISE DETAIL -->
   <div id="detail" hidden></div>
 </main>
@@ -480,22 +493,6 @@ main{position:relative;z-index:0;isolation:isolate}
     <button class="btn ghost" id="ownerBack" style="margin-top:10px">Back</button>
   </section>
 </div>
-
-<dialog class="sheet" id="sheet" aria-labelledby="sheetTitle">
-  <div class="sheet-panel">
-    <div class="grab" aria-hidden="true"></div>
-    <h2 id="sheetTitle">Cardio &amp; sports</h2>
-    <p class="hint">Tap everything you did today. It goes into the same session.</p>
-    <div class="acts">
-      <button class="act" data-t="run" style="--c:var(--run)" aria-pressed="false"><span class="badge" data-ic="run"></span>Run</button>
-      <button class="act" data-t="bike" style="--c:var(--bike)" aria-pressed="false"><span class="badge" data-ic="bike"></span>Bicycle</button>
-      <button class="act" data-t="tennis" style="--c:var(--tennis)" aria-pressed="false"><span class="badge" data-ic="tennis"></span>Tennis</button>
-      <button class="act" data-t="box" style="--c:var(--box)" aria-pressed="false"><span class="badge" data-ic="box"></span>Boxing</button>
-      <button class="act wide" data-t="swim" style="--c:var(--swim)" aria-pressed="false"><span class="badge" data-ic="swim"></span>Swimming</button>
-    </div>
-    <button class="btn" id="sheetDone">Done</button>
-  </div>
-</dialog>
 
 <div class="cheer" id="cheer" hidden role="dialog" aria-live="polite">
   <canvas id="confetti" aria-hidden="true"></canvas>
@@ -562,6 +559,7 @@ let tab = "sessions";
 document.querySelectorAll(".tabbar button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
 function showTab(t){
   tab = t; currentDetail = null;
+  document.getElementById("sportsView").hidden = true;
   document.querySelectorAll(".tabbar button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
   document.getElementById("tab-sessions").hidden = t !== "sessions";
   document.getElementById("tab-weights").hidden = t !== "weights";
@@ -1472,65 +1470,26 @@ go.addEventListener("click", () => {
   go.hidden = true;
 });
 
-/* ---- cardio & sports sheet (a real <dialog>, drawn by the browser in its own top layer) ---- */
-const sheet = document.getElementById("sheet");
-const panel = sheet.querySelector(".sheet-panel");
+/* ---- cardio & sports: its own page, like an exercise's progress page ---- */
 document.querySelectorAll(".badge").forEach(b => b.innerHTML = sportSvg(b.dataset.ic));
 syncPicks();
-const EASE = "cubic-bezier(.32,.72,0,1)";
-let sheetTimer = null;
-const setY = y => { panel.style.transform = panel.style.webkitTransform = `translate3d(0,${y},0)`; };
-function clearInline(){ panel.style.transition = panel.style.transform = panel.style.webkitTransform = ""; }
-function openSheet(){
-  clearTimeout(sheetTimer); clearInline();
-  if (!sheet.open){ try { sheet.showModal(); } catch(e){ sheet.setAttribute("open", ""); } }
-  requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.add("up")));
+const sportsView = document.getElementById("sportsView");
+let sportsScroll = 0;
+function openSports(){
+  sportsScroll = window.scrollY;
+  document.getElementById("tab-sessions").hidden = true;
+  sportsView.hidden = false;
+  window.scrollTo(0, 0);
 }
-function closeSheet(){
-  if (!sheet.open) return;
-  clearTimeout(sheetTimer);
-  const m = getComputedStyle(panel).transform.match(/matrix(3d)?\((.+)\)/);
-  const cur = m ? Number(m[2].split(",")[m[1] ? 13 : 5]) : 0;
-  panel.style.transition = "none"; setY(`${cur}px`); void panel.offsetHeight;
-  panel.style.transition = `transform .3s ${EASE}`; setY("105%");
-  sheet.classList.remove("up");
-  sheetTimer = setTimeout(() => { try { sheet.close(); } catch(e){ sheet.removeAttribute("open"); } clearInline(); }, 310);
+function closeSports(){
+  if (sportsView.hidden) return;
+  sportsView.hidden = true;
+  document.getElementById("tab-sessions").hidden = false;
+  window.scrollTo(0, sportsScroll);
 }
-document.getElementById("moreBtn").addEventListener("click", openSheet);
-document.getElementById("sheetDone").addEventListener("click", closeSheet);
-sheet.addEventListener("click", e => { if (e.target === sheet) closeSheet(); });   // tap the dim area
-sheet.addEventListener("cancel", e => { e.preventDefault(); closeSheet(); });     // escape key
-
-// swipe the panel down to close
-(() => {
-  let y0 = null, dy = 0, dragging = false, lastY = 0, lastT = 0, vel = 0, justDragged = false;
-  panel.addEventListener("touchstart", e => {
-    y0 = lastY = e.touches[0].clientY; lastT = performance.now(); dy = 0; vel = 0; dragging = false;
-  }, { passive: true });
-  sheet.addEventListener("touchmove", e => {
-    e.preventDefault();                                  // never scroll the page behind
-    if (y0 == null) return;
-    const y = e.touches[0].clientY, now = performance.now();
-    if (!dragging && Math.abs(y - y0) < 10) return;
-    if (!dragging){ dragging = true; y0 = y; }
-    const d = y - y0;
-    dy = d > 0 ? d : -Math.sqrt(-d) * 2.5;
-    vel = (y - lastY) / Math.max(1, now - lastT); lastY = y; lastT = now;
-    panel.style.transition = "none"; setY(`${dy}px`);
-  }, { passive: false });
-  const end = () => {
-    if (y0 == null) return;
-    y0 = null;
-    if (!dragging) return;
-    justDragged = true; setTimeout(() => justDragged = false, 350);
-    if (dy > panel.offsetHeight * .3 || (dy > 20 && vel > .45)) return closeSheet();
-    panel.style.transition = `transform .32s ${EASE}`; setY("0");
-    sheetTimer = setTimeout(clearInline, 340);
-  };
-  panel.addEventListener("touchend", end);
-  panel.addEventListener("touchcancel", end);
-  panel.addEventListener("click", e => { if (justDragged){ e.stopPropagation(); e.preventDefault(); } }, true);
-})();
+document.getElementById("moreBtn").addEventListener("click", openSports);
+document.getElementById("sheetDone").addEventListener("click", closeSports);
+document.getElementById("sportsBack").addEventListener("click", closeSports);
 
 /* ---- steps (sent from an iPhone shortcut as #steps=1234) ---- */
 const STEP_GOAL = 10000;
