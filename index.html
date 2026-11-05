@@ -174,15 +174,18 @@ li .tags{display:flex;gap:6px}
 .badge svg{width:23px;height:23px}
 .act[aria-pressed="true"] .badge{background:#fff;color:var(--c)}
 .sheet{touch-action:none;overscroll-behavior:contain;position:fixed;inset:0;z-index:50;-webkit-transform:translateZ(0);transform:translateZ(0);isolation:isolate;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0);transition:background .3s ease}
-.sheet.open{background:rgba(0,0,0,.42)}
+.sheet.open{background:var(--cover)}
+:root{--cover:rgba(16,18,20,.82)}
+html.sheet-covered main,html.sheet-covered .tabbar{visibility:hidden}
 .sheet-panel{width:100%;max-width:560px;background:var(--surface);border-radius:26px 26px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .36s cubic-bezier(.32,.72,0,1);-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .sheet.open .sheet-panel{transform:none}
 .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
 .sheet h2{margin:0 0 4px}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 16px}
-.act{font:inherit;font-weight:600;font-size:1.05rem;display:flex;align-items:center;gap:10px;padding:16px;border-radius:18px;border:2px solid transparent;background:var(--bg);color:var(--ink);cursor:pointer;transition:background-color .18s,border-color .18s,color .18s,opacity .12s}
+.act{font:inherit;font-weight:600;font-size:1.05rem;display:flex;align-items:center;gap:10px;padding:16px;border-radius:18px;border:2px solid transparent;background:var(--bg);color:var(--ink);cursor:pointer;transition:background-color .15s,border-color .15s,color .15s}
 .act.wide{grid-column:1/-1;justify-content:center}
-.act:active{opacity:.82}
+.act:active{background-color:color-mix(in srgb,var(--ink) 10%,var(--bg))}
+.act[aria-pressed="true"]:active{background-color:color-mix(in srgb,#000 15%,var(--c))}
 .act[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff}
 .stepsrow{display:flex;gap:8px;align-items:stretch;margin:-6px 0 16px}
 .stepsrow .steps{margin:0;flex:1;min-width:0}
@@ -1483,15 +1486,23 @@ function clearInline(){
   panel.style.transition = panel.style.transform = "";
   sheet.style.transition = sheet.style.background = "";
 }
+const root = document.documentElement;
+let coverTimer = null;
+function cover(on){
+  clearTimeout(coverTimer);
+  if (on) coverTimer = setTimeout(() => root.classList.add("sheet-covered"), 320);   // after the fade finishes
+  else root.classList.remove("sheet-covered");
+}
 function openSheet(){
   clearTimeout(sheetTimer); clearInline();
-  document.documentElement.classList.add("sheet-open");
+  root.classList.add("sheet-open");
   sheet.hidden = false;
-  requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.add("open")));
+  requestAnimationFrame(() => requestAnimationFrame(() => { sheet.classList.add("open"); cover(true); }));
 }
 function closeSheet(){
   if (sheet.hidden) return;
   clearTimeout(sheetTimer);
+  cover(false);
   // animate from wherever the panel is right now down off the screen
   const from = getComputedStyle(panel).transform;
   panel.style.transition = "none";
@@ -1502,7 +1513,7 @@ function closeSheet(){
   sheet.style.transition = "background .3s ease";
   sheet.style.background = "rgba(0,0,0,0)";
   sheet.classList.remove("open");
-  sheetTimer = setTimeout(() => { sheet.hidden = true; clearInline(); document.documentElement.classList.remove("sheet-open"); }, 310);
+  sheetTimer = setTimeout(() => { sheet.hidden = true; clearInline(); root.classList.remove("sheet-open"); }, 310);
 }
 document.getElementById("moreBtn").addEventListener("click", openSheet);
 document.getElementById("sheetDone").addEventListener("click", closeSheet);
@@ -1520,14 +1531,14 @@ sheet.addEventListener("click", e => { if (e.target === sheet) closeSheet(); });
     if (y0 == null) return;
     const y = e.touches[0].clientY, raw = y - y0, now = performance.now();
     if (!dragging && Math.abs(raw) < 10) return;         // small wiggles are still taps
-    if (!dragging){ dragging = true; y0 = y; }           // start from here so it doesn't jump
+    if (!dragging){ dragging = true; y0 = y; cover(false); }   // start from here so it doesn't jump
     const d = y - y0;
     dy = d > 0 ? d : -Math.sqrt(-d) * 2.5;               // a little stretch when pulled up
     vel = (y - lastY) / Math.max(1, now - lastT); lastY = y; lastT = now;
     panel.style.transition = "none";
     panel.style.transform = `translateY(${dy}px)`;
     sheet.style.transition = "none";
-    sheet.style.background = `rgba(0,0,0,${(0.42 * Math.max(0, 1 - Math.max(0, dy) / panel.offsetHeight)).toFixed(3)})`;
+    sheet.style.background = `rgba(16,18,20,${(0.82 * Math.max(0, 1 - Math.max(0, dy) / panel.offsetHeight)).toFixed(3)})`;
   }, { passive: false });
   const end = () => {
     if (y0 == null) return;
@@ -1541,6 +1552,7 @@ sheet.addEventListener("click", e => { if (e.target === sheet) closeSheet(); });
     sheet.style.transition = "background .32s ease";
     sheet.style.background = "";
     sheetTimer = setTimeout(clearInline, 340);
+    cover(true);
   };
   sheet.addEventListener("touchend", end);
   sheet.addEventListener("touchcancel", end);
