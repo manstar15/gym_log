@@ -41,7 +41,9 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:rgba(0,0,0,0);-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;-webkit-tap-highlight-color:transparent}
-main{max-width:560px;margin:0 auto;padding:20px 16px calc(110px + env(safe-area-inset-bottom,0px))}
+html{background:var(--bg)}
+body{min-height:100vh;min-height:100dvh}
+main{min-height:100vh;min-height:100dvh;max-width:560px;margin:0 auto;padding:20px 16px calc(110px + env(safe-area-inset-bottom,0px))}
 h1,h2,.big,.cond{font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif}
 h1{font-size:2.6rem;font-weight:800;margin:4px 0 18px;letter-spacing:.01em;line-height:1}
 h2{font-size:1.4rem;font-weight:600;margin:0 0 12px}
@@ -298,6 +300,14 @@ html.sheet-lock .tabbar{visibility:hidden}
 .bwtoday{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
 .bwtoday .cond{font-size:2rem;font-weight:800;line-height:1.1}
 .bwtoday p{margin:0;font-size:.85rem;color:var(--muted)}
+#bwChart{position:relative;padding-top:58px;cursor:pointer;touch-action:pan-y}
+.bwtip{position:absolute;top:0;display:flex;flex-wrap:wrap;gap:2px 10px;align-items:center;max-width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:7px 11px;font-size:.82rem;line-height:1.3;white-space:nowrap;box-shadow:0 6px 18px -8px rgba(0,0,0,.4)}
+.bwtip b{width:100%;font-size:.8rem;color:var(--muted);font-weight:600}
+.bwtip span{display:flex;align-items:center;gap:5px}
+.bwtip strong{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:1.05rem}
+.bwtip i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.bwtip .tipavg{color:var(--muted)}
+.bwtip.hint{left:0;background:transparent;border-style:dashed;color:var(--muted);box-shadow:none}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin-top:8px}
 .legend span{display:flex;align-items:center;gap:6px}
 .legend i{display:inline-block;width:18px;height:0;border-top:3px solid var(--c)}
@@ -1187,6 +1197,7 @@ document.querySelectorAll("#bwRange button").forEach(b => b.addEventListener("cl
   renderBody();
 }));
 
+let bwPts = null, bwPick = null;
 function bwChart(m, n, mAll){
   const all = [...m, ...n];
   if (!all.length) return `<p class="empty">Your chart starts after your first weigh-in.</p>`;
@@ -1199,6 +1210,12 @@ function bwChart(m, n, mAll){
   const X = d => t1 === t0 ? (L + W - R) / 2 : L + (parse(d).getTime() - t0) / (t1 - t0) * (W - L - R);
   const Y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
   const path = list => list.map((x,i) => `${i ? "L" : "M"}${X(x.date).toFixed(1)} ${Y(x.kg).toFixed(1)}`).join("");
+  const days = [...new Set(all.map(x => x.date))].sort();
+  bwPts = { W, H, T, B, pts: days.map(d => {
+    const mm = m.find(x => x.date === d), nn = n.find(x => x.date === d), a = avg.find(x => x.date === d);
+    return { date: d, x: X(d), m: mm ? mm.kg : null, n: nn ? nn.kg : null, avg: a ? a.kg : null,
+             ym: mm ? Y(mm.kg) : null, yn: nn ? Y(nn.kg) : null, ya: a && a.kg != null ? Y(a.kg) : null };
+  }) };
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Body weight over time">
     <line x1="${L}" x2="${W-R}" y1="${Y(vhi)}" y2="${Y(vhi)}" stroke="var(--line)" stroke-dasharray="3 4"/>
     <line x1="${L}" x2="${W-R}" y1="${Y(vlo)}" y2="${Y(vlo)}" stroke="var(--line)"/>
@@ -1208,10 +1225,46 @@ function bwChart(m, n, mAll){
     ${n.map(x => `<circle cx="${X(x.date).toFixed(1)}" cy="${Y(x.kg).toFixed(1)}" r="2.5" fill="var(--legs)"/>`).join("")}
     ${m.map(x => `<circle cx="${X(x.date).toFixed(1)}" cy="${Y(x.kg).toFixed(1)}" r="3.5" fill="var(--pull)" opacity=".35"/>`).join("")}
     ${avg.length > 1 ? `<path d="${path(avg)}" fill="none" stroke="var(--pull)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>` : ""}
+    <g id="bwSel"></g>
     <text x="${L}" y="${H-6}">${parse(iso(new Date(t0))).getDate()} ${MONTHS[new Date(t0).getMonth()]}</text>
     ${t1 !== t0 ? `<text x="${W-R}" y="${H-6}" text-anchor="end">${new Date(t1).getDate()} ${MONTHS[new Date(t1).getMonth()]}</text>` : ""}
   </svg>`;
 }
+
+function showBwDay(date){
+  const p = bwPts && bwPts.pts.find(x => x.date === date);
+  const sel = document.getElementById("bwSel"), tip = document.getElementById("bwTip");
+  if (!p || !sel || !tip){ return; }
+  bwPick = date;
+  const dot = (y, c, r) => y == null ? "" : `<circle cx="${p.x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${c}" stroke="var(--surface)" stroke-width="2"/>`;
+  sel.innerHTML = `<line x1="${p.x.toFixed(1)}" x2="${p.x.toFixed(1)}" y1="${bwPts.T}" y2="${bwPts.H - bwPts.B}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>`
+    + dot(p.yn, "var(--legs)", 4.5) + dot(p.ym, "var(--pull)", 5.5);
+  const d = parse(date);
+  tip.innerHTML = `<b>${DOW[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}</b>
+    ${p.m != null ? `<span><i style="background:var(--pull)"></i>Morning <strong>${kg1(p.m)} kg</strong></span>` : ""}
+    ${p.n != null ? `<span><i style="background:var(--legs)"></i>Night <strong>${kg1(p.n)} kg</strong></span>` : ""}
+    ${p.avg != null ? `<span class="tipavg">7-day avg ${kg1(p.avg)} kg</span>` : ""}`;
+  tip.hidden = false; tip.classList.remove("hint");
+  // keep the bubble inside the chart, over the picked day
+  const box = document.getElementById("bwChart").getBoundingClientRect();
+  const px = p.x / bwPts.W * box.width;
+  const w = tip.offsetWidth;
+  tip.style.left = Math.max(0, Math.min(box.width - w, px - w / 2)) + "px";
+}
+function pickBwAt(clientX){
+  const svg = document.querySelector("#bwChart svg");
+  if (!svg || !bwPts || !bwPts.pts.length) return;
+  const r = svg.getBoundingClientRect();
+  const x = (clientX - r.left) / r.width * bwPts.W;
+  let best = bwPts.pts[0];
+  for (const p of bwPts.pts) if (Math.abs(p.x - x) < Math.abs(best.x - x)) best = p;
+  showBwDay(best.date);
+}
+(() => {
+  const el = document.getElementById("bwChart");
+  el.addEventListener("click", e => pickBwAt(e.clientX));
+  el.addEventListener("touchmove", e => { if (e.touches[0]) pickBwAt(e.touches[0].clientX); }, { passive: true });
+})();
 
 function renderBody(){
   renderBwHint(); fillBwValue();
@@ -1237,7 +1290,8 @@ function renderBody(){
       ${mo != null ? `<div><div class="big chg ${cls(mo)}">${signed(mo)}</div><p>vs. 4 weeks ago</p></div>` : ""}`;
   }
   const from = bwRange ? iso(addDays(new Date(), -(bwRange-1))) : "0000";
-  document.getElementById("bwChart").innerHTML = bwChart(M.filter(x => x.date >= from), N.filter(x => x.date >= from), M);
+  document.getElementById("bwChart").innerHTML = bwChart(M.filter(x => x.date >= from), N.filter(x => x.date >= from), M) + `<div class="bwtip hint" id="bwTip">Tap or slide along the chart to see any day</div>`;
+  if (bwPick && bwPts && bwPts.pts.some(p => p.date === bwPick)) showBwDay(bwPick); else bwPick = null;
 
   const days = Object.keys(bw).filter(d => bw[d].m || bw[d].n).sort().reverse().slice(0, 60);
   const ul = document.getElementById("bwList");
