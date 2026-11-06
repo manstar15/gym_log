@@ -174,24 +174,39 @@ li .tags{display:flex;gap:6px}
 .badge svg{width:23px;height:23px}
 .act[aria-pressed="true"] .badge{background:#fff;color:var(--c)}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 16px}
-#sportsView:not([hidden]){animation:slideIn .34s cubic-bezier(.32,.72,0,1) backwards}
-@keyframes slideIn{from{transform:translateX(32px);opacity:0}to{transform:none;opacity:1}}
-#sportsView{min-height:calc(100vh - 40px);min-height:calc(100dvh - 40px)}
 .sv-top{display:flex;align-items:center;justify-content:space-between;margin:2px 0 14px}
 .sv-back{width:42px;height:42px;border-radius:50%;border:0;background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}
 .sv-back svg{width:20px;height:20px}
 .sv-count{font-size:.85rem;font-weight:600;color:var(--muted);background:var(--surface);padding:6px 12px;border-radius:20px}
 .sv-count.on{color:var(--ink)}
-.sv-title{font-size:2.6rem;margin:0 0 4px}
-#sportsView .acts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0 18px}
-#sportsView .act{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:18px;min-height:150px;padding:16px;border-radius:24px;border:2px solid transparent;
+.sv-title{font-size:2.1rem;font-weight:800;margin:0 0 2px;line-height:1}
+/* overlay: NOT position:fixed and no transforms once open, so iPhone draws it with the page in one piece */
+.ssheet{position:absolute;left:0;width:100%;z-index:50}
+.ssheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.5)}
+.ssheet-panel{position:absolute;left:0;right:0;bottom:0;margin:0 auto;max-width:560px;max-height:92%;overflow:hidden;background:var(--bg);
+  border-radius:28px 28px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -12px 40px rgba(0,0,0,.35)}
+.ssheet .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.ssheet .sv-top{margin:0 0 10px}
+.ssheet:not([hidden]) .ssheet-bg{animation:sbgIn .3s ease-out}
+.ssheet:not([hidden]) .ssheet-panel{animation:spanelIn .38s cubic-bezier(.32,.72,0,1)}
+.ssheet.closing .ssheet-bg{animation:sbgOut .26s ease-in forwards}
+.ssheet.closing .ssheet-panel{animation:spanelOut .26s cubic-bezier(.4,0,1,1) forwards}
+@keyframes sbgIn{from{opacity:0}}
+@keyframes sbgOut{to{opacity:0}}
+@keyframes spanelIn{from{transform:translateY(100%)}}
+@keyframes spanelOut{to{transform:translateY(100%)}}
+html.sheet-lock{overflow:hidden}
+html.sheet-lock .tabbar{visibility:hidden}
+.ssheet-bg{touch-action:none}
+#sportsView .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 14px}
+#sportsView .act{position:relative;display:flex;-webkit-tap-highlight-color:transparent;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:12px;min-height:122px;padding:14px;border-radius:22px;border:2px solid transparent;
   background:var(--surface);color:var(--ink);text-align:left;font:inherit;cursor:pointer;overflow:hidden;transition:background-color .18s,border-color .18s}
-#sportsView .act::before{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:var(--c);opacity:.10;pointer-events:none}
-#sportsView .act.wide{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:flex-start;min-height:96px;gap:14px}
-#sportsView .badge{width:52px;height:52px}
-#sportsView .badge svg{width:28px;height:28px}
+#sportsView .act::before{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:color-mix(in srgb,var(--c) 11%,transparent);pointer-events:none}
+#sportsView .act.wide{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:flex-start;min-height:80px;gap:14px}
+#sportsView .badge{width:46px;height:46px}
+#sportsView .badge svg{width:25px;height:25px}
 .acttxt{display:flex;flex-direction:column;line-height:1.15}
-.acttxt b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:1.55rem;letter-spacing:.01em}
+.acttxt b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:1.4rem;letter-spacing:.01em}
 .acttxt small{font-size:.8rem;color:var(--muted);margin-top:3px}
 .tick{position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--bg);color:transparent;border:2px solid var(--line);transition:background-color .18s,border-color .18s,color .18s}
 .tick svg{width:15px;height:15px}
@@ -201,8 +216,6 @@ li .tags{display:flex;gap:6px}
 #sportsView .act[aria-pressed="true"] .acttxt small{color:var(--ink);opacity:.75}
 #sportsView .act:active{background-color:color-mix(in srgb,var(--ink) 6%,var(--surface))}
 #sportsView .act[aria-pressed="true"]:active{background-color:color-mix(in srgb,var(--c) 28%,var(--surface))}
-.sv-bar{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));padding-top:8px;z-index:2}
-.sv-bar .btn{box-shadow:0 10px 30px -10px rgba(0,0,0,.5);padding:16px;font-size:1.05rem}
 .act{font:inherit;font-weight:600;font-size:1.05rem;display:flex;align-items:center;gap:10px;padding:16px;border-radius:18px;border:2px solid transparent;background:var(--bg);color:var(--ink);cursor:pointer;transition:background-color .15s,border-color .15s,color .15s}
 .act.wide{grid-column:1/-1;justify-content:center}
 .act:active{background-color:color-mix(in srgb,var(--ink) 10%,var(--bg))}
@@ -467,43 +480,6 @@ main{position:relative;z-index:0;isolation:isolate}
   </div>
 
   <!-- CARDIO & SPORTS PICKER -->
-  <div id="sportsView" hidden>
-    <div class="sv-top">
-      <button class="sv-back" id="sportsBack" aria-label="Back to log a session"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <span class="sv-count" id="svCount">Nothing picked yet</span>
-    </div>
-    <h1 class="sv-title">Cardio &amp; sports</h1>
-    <p class="hint">Tap everything you did today. It all goes into the same session.</p>
-    <div class="acts">
-      <button class="act" data-t="run" style="--c:var(--run)" aria-pressed="false">
-        <span class="badge" data-ic="run"></span>
-        <span class="acttxt"><b>Run</b><small>Outdoor or treadmill</small></span>
-        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
-      </button>
-      <button class="act" data-t="bike" style="--c:var(--bike)" aria-pressed="false">
-        <span class="badge" data-ic="bike"></span>
-        <span class="acttxt"><b>Bicycle</b><small>Road or stationary</small></span>
-        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
-      </button>
-      <button class="act" data-t="tennis" style="--c:var(--tennis)" aria-pressed="false">
-        <span class="badge" data-ic="tennis"></span>
-        <span class="acttxt"><b>Tennis</b><small>Singles or doubles</small></span>
-        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
-      </button>
-      <button class="act" data-t="box" style="--c:var(--box)" aria-pressed="false">
-        <span class="badge" data-ic="box"></span>
-        <span class="acttxt"><b>Boxing</b><small>Bag or sparring</small></span>
-        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
-      </button>
-      <button class="act wide" data-t="swim" style="--c:var(--swim)" aria-pressed="false">
-        <span class="badge" data-ic="swim"></span>
-        <span class="acttxt"><b>Swimming</b><small>Pool or open water</small></span>
-        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
-      </button>
-    </div>
-    <div class="sv-bar"><button class="btn" id="sheetDone">Done</button></div>
-  </div>
-
   <!-- EXERCISE DETAIL -->
   <div id="detail" hidden></div>
 </main>
@@ -537,6 +513,48 @@ main{position:relative;z-index:0;isolation:isolate}
     </div>
     <button class="btn ghost" id="ownerBack" style="margin-top:10px">Back</button>
   </section>
+</div>
+
+<div class="ssheet" id="sportsSheet" hidden>
+  <div class="ssheet-bg" id="sportsBg"></div>
+  <div class="ssheet-panel" id="sportsView" role="dialog" aria-modal="true" aria-label="Cardio and sports">
+
+    <div class="sv-top">
+      
+      <span class="sv-count" id="svCount">Nothing picked yet</span>
+      <button class="sv-back" id="sportsBack" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <h2 class="sv-title">Cardio &amp; sports</h2>
+    <p class="hint">Tap everything you did today. It all goes into the same session.</p>
+    <div class="acts">
+      <button class="act" data-t="run" style="--c:var(--run)" aria-pressed="false">
+        <span class="badge" data-ic="run"></span>
+        <span class="acttxt"><b>Run</b><small>Outdoor or treadmill</small></span>
+        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
+      </button>
+      <button class="act" data-t="bike" style="--c:var(--bike)" aria-pressed="false">
+        <span class="badge" data-ic="bike"></span>
+        <span class="acttxt"><b>Bicycle</b><small>Road or stationary</small></span>
+        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
+      </button>
+      <button class="act" data-t="tennis" style="--c:var(--tennis)" aria-pressed="false">
+        <span class="badge" data-ic="tennis"></span>
+        <span class="acttxt"><b>Tennis</b><small>Singles or doubles</small></span>
+        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
+      </button>
+      <button class="act" data-t="box" style="--c:var(--box)" aria-pressed="false">
+        <span class="badge" data-ic="box"></span>
+        <span class="acttxt"><b>Boxing</b><small>Bag or sparring</small></span>
+        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
+      </button>
+      <button class="act wide" data-t="swim" style="--c:var(--swim)" aria-pressed="false">
+        <span class="badge" data-ic="swim"></span>
+        <span class="acttxt"><b>Swimming</b><small>Pool or open water</small></span>
+        <i class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>
+      </button>
+    </div>
+    <div class="sv-bar"><button class="btn" id="sheetDone">Done</button></div>
+  </div>
 </div>
 
 <div class="cheer" id="cheer" hidden role="dialog" aria-live="polite">
@@ -604,7 +622,7 @@ let tab = "sessions";
 document.querySelectorAll(".tabbar button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
 function showTab(t){
   tab = t; currentDetail = null;
-  document.getElementById("sportsView").hidden = true;
+  if (!document.getElementById("sportsSheet").hidden){ document.getElementById("sportsSheet").hidden = true; document.documentElement.classList.remove("sheet-lock"); }
   document.querySelectorAll(".tabbar button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
   document.getElementById("tab-sessions").hidden = t !== "sessions";
   document.getElementById("tab-weights").hidden = t !== "weights";
@@ -1521,23 +1539,35 @@ go.addEventListener("click", () => {
 /* ---- cardio & sports: its own page, like an exercise's progress page ---- */
 document.querySelectorAll(".badge").forEach(b => b.innerHTML = sportSvg(b.dataset.ic));
 syncPicks();
-const sportsView = document.getElementById("sportsView");
-let sportsScroll = 0;
+const sportsSheet = document.getElementById("sportsSheet");
+let sportsTimer = null;
 function openSports(){
-  sportsScroll = window.scrollY;
-  window.scrollTo(0, 0);
-  document.getElementById("tab-sessions").hidden = true;
-  sportsView.hidden = false;
+  clearTimeout(sportsTimer);
+  sportsSheet.classList.remove("closing");
+  // sit exactly over what's on screen right now, as part of the page (no fixed layer)
+  const y = window.scrollY;
+  sportsSheet.style.top = y + "px";
+  sportsSheet.style.height = window.innerHeight + "px";
+  document.documentElement.classList.add("sheet-lock");
+  window.scrollTo(0, y);                                 // locking scroll must not jump the page
+  sportsSheet.hidden = false;
 }
 function closeSports(){
-  if (sportsView.hidden) return;
-  sportsView.hidden = true;
-  document.getElementById("tab-sessions").hidden = false;
-  window.scrollTo(0, sportsScroll);
+  if (sportsSheet.hidden || sportsSheet.classList.contains("closing")) return;
+  sportsSheet.classList.add("closing");
+  sportsTimer = setTimeout(() => {
+    const y = window.scrollY;
+    sportsSheet.hidden = true;
+    sportsSheet.classList.remove("closing");
+    document.documentElement.classList.remove("sheet-lock");
+    window.scrollTo(0, y);
+  }, 260);
 }
 document.getElementById("moreBtn").addEventListener("click", openSports);
 document.getElementById("sheetDone").addEventListener("click", closeSports);
 document.getElementById("sportsBack").addEventListener("click", closeSports);
+document.getElementById("sportsBg").addEventListener("click", closeSports);
+addEventListener("resize", () => { if (!sportsSheet.hidden){ sportsSheet.style.top = window.scrollY + "px"; sportsSheet.style.height = window.innerHeight + "px"; } });
 
 /* ---- steps (sent from an iPhone shortcut as #steps=1234) ---- */
 const STEP_GOAL = 10000;
