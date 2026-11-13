@@ -154,11 +154,35 @@ li .tags{display:flex;gap:6px}
 .chip.same{background:var(--bg);color:var(--muted)}
 
 .tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);display:flex;justify-content:center;z-index:5}
-.tabbar div{display:grid;grid-template-columns:1fr 1fr 1fr;width:100%;max-width:560px}
+.tabbar div{display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:560px}
 .tabbar button{font:inherit;font-size:.8rem;font-weight:600;background:transparent;border:0;color:var(--muted);padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
 .tabbar button[aria-selected="true"]{color:var(--ink)}
 .tabbar svg{width:26px;height:26px}
 [hidden]{display:none!important}
+#tab-cardio:not([hidden]),#cardioDetail:not([hidden]){animation:fadeUp .32s ease backwards}
+#cardioWeek .cond{font-size:1.7rem;white-space:nowrap}
+.crow{display:flex;align-items:center;gap:14px;width:100%;font:inherit;color:var(--ink);text-align:left;background:var(--surface);border:0;border-radius:18px;padding:14px 16px;margin-bottom:10px;cursor:pointer;position:relative;overflow:hidden;transition:transform .2s cubic-bezier(.25,1,.5,1)}
+.crow::before{content:"";position:absolute;right:-40px;top:-40px;width:120px;height:120px;border-radius:50%;background:color-mix(in srgb,var(--c) 10%,transparent);pointer-events:none}
+.crow:active{transform:scale(.985)}
+.crow .badge{width:48px;height:48px}
+.crow .badge svg{width:26px;height:26px}
+.crow-txt{flex:1;min-width:0;display:flex;flex-direction:column}
+.crow-txt b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:1.45rem;line-height:1.1}
+.crow-txt small{color:var(--muted);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge.big{width:84px;height:84px;border-radius:24px}
+.badge.big svg{width:48px;height:48px}
+.clog{border-top:4px solid var(--c)}
+.tbox{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.tbox label{display:flex;align-items:baseline;justify-content:center;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 6px}
+.tbox input{width:100%;max-width:64px;text-align:right;background:transparent;border:0;color:var(--ink);font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:1.8rem;padding:0;-moz-appearance:textfield}
+.tbox input::-webkit-outer-spin-button,.tbox input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.tbox span{color:var(--muted);font-size:.85rem}
+.cstep{margin-bottom:12px}
+.cprev{min-height:1.6em;margin:0 0 12px;font-weight:600;color:var(--c);font-size:1.05rem}
+.cstats{gap:20px}
+.cstats .cond{font-size:1.9rem;font-weight:800;line-height:1.05}
+.cstats p{margin:2px 0 0;color:var(--muted);font-size:.85rem}
+.clist li b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:1.3rem;font-weight:800}
 .morebtn{--c:var(--line);display:flex;align-items:center;gap:10px;width:100%;max-width:100%;overflow:hidden;font:inherit;color:var(--ink);text-align:left;background:var(--bg);border:1.5px solid var(--line);border-radius:18px;padding:12px 12px 12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .2s,background .2s,box-shadow .2s,transform .18s ease-out}
 .morebtn:active{transform:scale(.985)}
 .morebtn.has{border-color:var(--c);background:color-mix(in srgb,var(--c) 9%,var(--surface));box-shadow:0 6px 18px -10px var(--c)}
@@ -490,6 +514,17 @@ main{position:relative;z-index:0;isolation:isolate}
   </div>
 
   <!-- CARDIO & SPORTS PICKER -->
+  <!-- CARDIO -->
+  <div id="tab-cardio" hidden>
+    <h1>Cardio</h1>
+    <section aria-label="This week">
+      <h2>This week</h2>
+      <div class="bwtoday" id="cardioWeek"></div>
+    </section>
+    <div id="cardioList"></div>
+  </div>
+  <div id="cardioDetail" hidden></div>
+
   <!-- EXERCISE DETAIL -->
   <div id="detail" hidden></div>
 </main>
@@ -593,6 +628,10 @@ main{position:relative;z-index:0;isolation:isolate}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M8 9a5.5 5.5 0 0 1 8 0M12 9.5l1.5-2"/></svg>
       Body
     </button>
+    <button role="tab" data-tab="cardio" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6a5 5 0 0 0-8.8-3.2A5 5 0 0 0 3.2 8.6c0 5 8.8 10.9 8.8 10.9s3.4-2.3 5.9-5.2"/><path d="M3 12h4l2-3 3 6 2-3h3"/></svg>
+      Cardio
+    </button>
   </div>
 </nav>
 
@@ -637,9 +676,12 @@ function showTab(t){
   document.getElementById("tab-sessions").hidden = t !== "sessions";
   document.getElementById("tab-weights").hidden = t !== "weights";
   document.getElementById("tab-body").hidden = t !== "body";
+  document.getElementById("tab-cardio").hidden = t !== "cardio";
+  document.getElementById("cardioDetail").hidden = true; currentCardio = null;
   document.getElementById("detail").hidden = true;
   if (t === "weights") renderExercises();
   if (t === "body") renderBody();
+  if (t === "cardio") renderCardio();
   window.scrollTo(0,0);
 }
 
@@ -1307,6 +1349,182 @@ function renderBody(){
 }
 document.querySelector(`#bwKind button[data-k="${bwKind}"]`).click();
 
+/* ================= cardio ================= */
+const CSPORT = {
+  run:    { name: "Run",      one: "run",     many: "runs",     dist: "km", step: 0.1, chart: "speed", chartName: "Speed (km/h)" },
+  bike:   { name: "Bicycle",  one: "ride",    many: "rides",    dist: "km", step: 0.5, chart: "speed", chartName: "Speed (km/h)" },
+  swim:   { name: "Swimming", one: "swim",    many: "swims",    dist: "m",  step: 50,  chart: "dist",  chartName: "Distance (m)" },
+  tennis: { name: "Tennis",   one: "session", many: "sessions", dist: null,             chart: "time",  chartName: "Time (min)" },
+  box:    { name: "Boxing",   one: "session", many: "sessions", dist: null, rounds: true, chart: "time", chartName: "Time (min)" },
+};
+const CORDER = ["run", "bike", "swim", "tennis", "box"];
+let currentCardio = null;
+const cardioAll = () => (lifts.__cardio || []).slice().sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+const cardioOf = sp => cardioAll().filter(x => x.sport === sp);
+
+const dur = sec => {
+  sec = Math.round(sec);
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+};
+const durWords = sec => {
+  const h = Math.floor(sec / 3600), m = Math.round(sec % 3600 / 60);
+  return h ? `${h}h ${m}m` : `${m} min`;
+};
+function metrics(x){
+  const sp = CSPORT[x.sport], out = {};
+  if (sp.dist === "km" && x.km > 0){
+    out.speed = x.km / (x.sec / 3600);
+    out.pace = x.sec / x.km;                              // seconds per km
+  }
+  if (sp.dist === "m" && x.km > 0) out.pace100 = x.sec / (x.km * 10);   // seconds per 100 m
+  return out;
+}
+const distText = x => !CSPORT[x.sport].dist ? "" : CSPORT[x.sport].dist === "m" ? `${Math.round(x.km * 1000)} m` : `${(Math.round(x.km * 100) / 100)} km`;
+function metricText(x){
+  const m = metrics(x);
+  if (x.sport === "run") return m.pace ? `${dur(m.pace)} /km · ${m.speed.toFixed(1)} km/h` : "";
+  if (x.sport === "bike") return m.speed ? `${m.speed.toFixed(1)} km/h` : "";
+  if (x.sport === "swim") return m.pace100 ? `${dur(m.pace100)} /100 m` : "";
+  if (x.sport === "box" && x.rounds) return `${x.rounds} rounds`;
+  return "";
+}
+
+/* ---- list page ---- */
+function renderCardio(){
+  const s0 = weekStart(new Date()), wk = cardioAll().filter(x => { const d = parse(x.date); return d >= s0 && d < addDays(s0, 7); });
+  const wkSec = wk.reduce((a, x) => a + x.sec, 0), wkKm = wk.reduce((a, x) => a + (CSPORT[x.sport].dist ? x.km : 0), 0);
+  document.getElementById("cardioWeek").innerHTML = `
+    <div><div class="cond">${wk.length}</div><p>${wk.length === 1 ? "workout" : "workouts"}</p></div>
+    <div><div class="cond">${wkSec ? durWords(wkSec) : "0 min"}</div><p>total time</p></div>
+    <div><div class="cond">${(Math.round(wkKm * 10) / 10)} km</div><p>distance</p></div>`;
+  document.getElementById("cardioList").innerHTML = CORDER.map(k => {
+    const sp = CSPORT[k], list = cardioOf(k), last = list[list.length - 1];
+    const sub = last ? `${list.length} ${list.length === 1 ? sp.one : sp.many} · last ${[distText(last), dur(last.sec)].filter(Boolean).join(", ")}, ${ago(last.date)}` : `No ${sp.many} yet`;
+    return `<button class="crow" data-sp="${k}" style="--c:var(--${k})">
+      <span class="badge">${sportSvg(k)}</span>
+      <span class="crow-txt"><b>${sp.name}</b><small>${sub}</small></span>
+      <span class="chev" aria-hidden="true">›</span>
+    </button>`;
+  }).join("");
+}
+document.getElementById("cardioList").addEventListener("click", e => {
+  const b = e.target.closest(".crow"); if (b) openCardio(b.dataset.sp);
+});
+
+/* ---- one sport ---- */
+function openCardio(k){
+  currentCardio = k;
+  const sp = CSPORT[k], list = cardioOf(k), last = list[list.length - 1];
+  const el = document.getElementById("cardioDetail");
+  const lastSec = last ? last.sec : (k === "run" ? 1800 : k === "bike" ? 3600 : 2700);
+  const lastDist = last && sp.dist ? (sp.dist === "m" ? Math.round(last.km * 1000) : Math.round(last.km * 100) / 100) : (sp.dist === "m" ? 1000 : k === "run" ? 5 : 20);
+
+  // stats
+  const s0 = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const month = list.filter(x => parse(x.date) >= s0);
+  const mSec = month.reduce((a, x) => a + x.sec, 0), mKm = month.reduce((a, x) => a + (x.km || 0), 0);
+  let best = "";
+  if (list.length){
+    if (k === "run"){ const f = list.filter(x => x.km >= 1).sort((a, b) => metrics(a).pace - metrics(b).pace)[0]; const l = list.slice().sort((a, b) => b.km - a.km)[0];
+      best = `${f ? `<div><div class="cond">${dur(metrics(f).pace)}</div><p>Fastest pace /km</p></div>` : ""}<div><div class="cond">${Math.round(l.km * 100) / 100} km</div><p>Longest run</p></div>`; }
+    else if (k === "bike"){ const f = list.slice().sort((a, b) => metrics(b).speed - metrics(a).speed)[0]; const l = list.slice().sort((a, b) => b.km - a.km)[0];
+      best = `<div><div class="cond">${metrics(f).speed.toFixed(1)}</div><p>Fastest km/h</p></div><div><div class="cond">${Math.round(l.km * 10) / 10} km</div><p>Longest ride</p></div>`; }
+    else if (k === "swim"){ const l = list.slice().sort((a, b) => b.km - a.km)[0], f = list.slice().sort((a, b) => metrics(a).pace100 - metrics(b).pace100)[0];
+      best = `<div><div class="cond">${dur(metrics(f).pace100)}</div><p>Fastest /100 m</p></div><div><div class="cond">${Math.round(l.km * 1000)} m</div><p>Longest swim</p></div>`; }
+    else { const l = list.slice().sort((a, b) => b.sec - a.sec)[0];
+      best = `<div><div class="cond">${durWords(l.sec)}</div><p>Longest ${sp.one}</p></div>`; }
+  }
+  const chartPts = list.map(x => ({ date: x.date, kg: sp.chart === "speed" ? Math.round(metrics(x).speed * 10) / 10 : sp.chart === "dist" ? Math.round(x.km * 1000) : Math.round(x.sec / 60) })).filter(p => isFinite(p.kg));
+
+  el.innerHTML = `<button class="back" id="cardioBack">‹ Cardio</button>
+    <div class="dhead" style="--c:var(--${k})"><span class="badge big">${sportSvg(k)}</span><div><h1>${sp.name}</h1><div class="exsub">${list.length} ${list.length === 1 ? sp.one : sp.many} logged</div></div></div>
+
+    <section class="clog" style="--c:var(--${k})">
+      <h2>Log a ${sp.one}</h2>
+      <label class="field" for="cDate">Date</label>
+      <input type="date" id="cDate" value="${iso(new Date())}">
+      <label class="field">Time</label>
+      <div class="tbox">
+        <label><input id="cH" type="number" inputmode="numeric" min="0" value="${Math.floor(lastSec / 3600)}"><span>h</span></label>
+        <label><input id="cM" type="number" inputmode="numeric" min="0" max="59" value="${Math.floor(lastSec % 3600 / 60)}"><span>min</span></label>
+        <label><input id="cS" type="number" inputmode="numeric" min="0" max="59" value="${lastSec % 60}"><span>sec</span></label>
+      </div>
+      ${sp.dist ? `<label class="field">Distance</label>
+      <div class="bwstep cstep">
+        <button data-d="-1" aria-label="Less distance">−</button>
+        <label class="val bwval"><input id="cDist" type="number" inputmode="decimal" step="any" min="0" value="${lastDist}"><small>${sp.dist}</small></label>
+        <button data-d="1" aria-label="More distance">+</button>
+      </div>` : ""}
+      ${sp.rounds ? `<label class="field" for="cR">Rounds (optional)</label>
+      <input class="inp" id="cR" type="number" inputmode="numeric" min="0" placeholder="e.g. 6" value="${last && last.rounds ? last.rounds : ""}">` : ""}
+      <div class="cprev" id="cPrev"></div>
+      <button class="btn" id="cSave">Log ${sp.one}</button>
+      <div class="toast" id="cToast" role="status"></div>
+    </section>
+
+    ${list.length ? `<section>
+      <h2>This month</h2>
+      <div class="stats cstats">
+        <div><div class="cond">${month.length}</div><p>${month.length === 1 ? sp.one : sp.many}</p></div>
+        <div><div class="cond">${mSec ? durWords(mSec) : "0 min"}</div><p>total time</p></div>
+        ${sp.dist ? `<div><div class="cond">${sp.dist === "m" ? Math.round(mKm * 1000) + " m" : Math.round(mKm * 10) / 10 + " km"}</div><p>distance</p></div>` : ""}
+      </div>
+      <h2 style="margin-top:14px">Bests</h2>
+      <div class="stats cstats">${best}</div>
+      ${chartPts.length ? `<h2 style="margin-top:14px">${sp.chartName}</h2><div class="chart">${lineChart(chartPts, `var(--${k})`)}</div>` : ""}
+    </section>
+    <section style="--c:var(--${k})">
+      <h2>All ${sp.many}</h2>
+      <ul class="clist">${list.slice().reverse().map(x => `<li>
+        <div><b>${[distText(x), dur(x.sec)].filter(Boolean).join(" · ")}</b>
+        <div class="exsub">${fmt(parse(x.date))}${metricText(x) ? " · " + metricText(x) : ""}</div></div>
+        <button class="del" data-cid="${x.id}">Delete</button></li>`).join("")}</ul>
+    </section>` : `<section><p class="empty">Your ${sp.many} will show up here with your times${sp.dist ? ", distances and speed" : ""}.</p></section>`}`;
+
+  el.querySelector("#cardioBack").addEventListener("click", () => showTab("cardio"));
+  const upd = () => {
+    const sec = (+el.querySelector("#cH").value || 0) * 3600 + (+el.querySelector("#cM").value || 0) * 60 + (+el.querySelector("#cS").value || 0);
+    const dEl = el.querySelector("#cDist"), dv = dEl ? parseFloat(dEl.value) || 0 : 0;
+    const km = sp.dist === "m" ? dv / 1000 : dv;
+    const x = { sport: k, sec, km, rounds: +(el.querySelector("#cR") || {}).value || 0 };
+    el.querySelector("#cPrev").textContent = sec > 0 && (!sp.dist || km > 0) ? (metricText(x) || durWords(sec)) : "";
+    return x;
+  };
+  el.querySelectorAll(".tbox input, #cDist, #cR").forEach(i => i.addEventListener("input", upd));
+  el.querySelectorAll(".cstep button").forEach(b => b.addEventListener("click", () => {
+    const i = el.querySelector("#cDist");
+    i.value = Math.max(0, Math.round(((parseFloat(i.value) || 0) + sp.step * Number(b.dataset.d)) * 100) / 100);
+    upd();
+  }));
+  upd();
+  el.querySelector("#cSave").addEventListener("click", () => {
+    const x = upd(), date = el.querySelector("#cDate").value, toast = el.querySelector("#cToast");
+    if (!date || x.sec <= 0){ toast.textContent = "Enter how long it took first."; return; }
+    if (sp.dist && !(x.km > 0)){ toast.textContent = "Enter the distance first."; return; }
+    const entry = { id: Date.now().toString(36), sport: k, date, sec: x.sec };
+    if (sp.dist) entry.km = Math.round(x.km * 1000) / 1000;
+    if (sp.rounds && x.rounds) entry.rounds = x.rounds;
+    (lifts.__cardio = lifts.__cardio || []).push(entry);
+    // also mark it on that day's session
+    const ses = entries.find(e => e.date === date);
+    if (ses){ if (!ses.types.includes(k)) ses.types = [...ses.types, k].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b)); }
+    else entries.push({ id: Date.now().toString(36) + "s", date, types: [k] });
+    saveAll(); render();
+    openCardio(k);
+    cheer(k);
+    const done = document.querySelector("#cardioDetail #cToast");
+    if (done) done.textContent = `Logged ${[distText(entry), dur(entry.sec), metricText(entry)].filter(Boolean).join(" · ")}.`;
+  });
+  el.querySelectorAll("[data-cid]").forEach(b => b.addEventListener("click", () => armDelete(b, () => {
+    lifts.__cardio = (lifts.__cardio || []).filter(x => x.id !== b.dataset.cid); saveAll(); openCardio(k);
+  })));
+
+  document.getElementById("tab-cardio").hidden = true;
+  el.hidden = false;
+  window.scrollTo(0, 0);
+}
+
 /* ================= sync to GitHub ================= */
 // Everything is saved to data.json in this repository:
 const GH_OWNER = "manstar15";
@@ -1336,6 +1554,8 @@ function rerender(){
   if (currentDetail) openDetail(currentDetail);
   else if (tab === "weights") renderExercises();
   else if (tab === "body") renderBody();
+  else if (currentCardio) openCardio(currentCardio);
+  else if (tab === "cardio") renderCardio();
 }
 function merge(a, b){
   const E = new Map();
