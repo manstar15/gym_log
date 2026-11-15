@@ -172,6 +172,13 @@ li .tags{display:flex;gap:6px}
 .badge.big{width:84px;height:84px;border-radius:24px}
 .badge.big svg{width:48px;height:48px}
 .clog{border-top:4px solid var(--c)}
+.needs{color:var(--c);font-weight:600}
+.cpend{border:1.5px dashed var(--c)}
+.cpend-row{display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;color:var(--ink);background:var(--bg);border:0;border-radius:14px;padding:12px 14px;margin-top:8px;cursor:pointer;text-align:left}
+.cpend-row span:first-child{display:flex;flex-direction:column}
+.cpend-row small{color:var(--muted)}
+.cpend-go{color:var(--c);font-weight:600;font-size:.9rem}
+.cedit{cursor:pointer;flex:1}
 .tbox{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
 .tbox label{display:flex;align-items:baseline;justify-content:center;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 6px}
 .tbox input{width:100%;max-width:64px;text-align:right;background:transparent;border:0;color:var(--ink);font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:1.8rem;padding:0;-moz-appearance:textfield}
@@ -336,6 +343,7 @@ html.sheet-lock .tabbar{visibility:hidden}
 .legend span{display:flex;align-items:center;gap:6px}
 .legend i{display:inline-block;width:18px;height:0;border-top:3px solid var(--c)}
 .legend i.dash{border-top-style:dashed}
+.legend i.soft{border-top-width:8px;opacity:.25;border-radius:4px}
 .legend i.dotk{width:9px;height:9px;border:0;border-radius:50%;background:var(--c);opacity:.5}
 .bwrow{display:grid;grid-template-columns:1fr auto auto;gap:4px 14px;align-items:center}
 .bwrow b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:1.25rem}
@@ -502,8 +510,8 @@ main{position:relative;z-index:0;isolation:isolate}
       <div class="stats" id="bwStats"></div>
       <div class="chart" id="bwChart"></div>
       <div class="legend">
-        <span><i style="--c:var(--pull)"></i>7-day average</span>
-        <span><i class="dotk" style="--c:var(--pull)"></i>Morning</span>
+        <span><i style="--c:var(--pull)"></i>Morning</span>
+        <span><i class="soft" style="--c:var(--pull)"></i>7-day trend</span>
         <span><i class="dash" style="--c:var(--legs)"></i>Night max</span>
       </div>
     </section>
@@ -740,14 +748,23 @@ document.getElementById("save").addEventListener("click", () => {
   const types = [...picked].sort((a,b) => ORDER.indexOf(a) - ORDER.indexOf(b));
   const id = Date.now().toString(36);
   entries.push({ id, date: dateInput.value, types });
+  const made = addPendingCardio(dateInput.value, types);
   saveAll();
   const toast = document.getElementById("toast");
-  toast.innerHTML = `Logged ${types.map(t => TYPES[t]).join(" + ")} on ${fmt(parse(dateInput.value))}. <button class="undo">Undo</button>`;
+  toast.innerHTML = `Logged ${types.map(t => TYPES[t]).join(" + ")} on ${fmt(parse(dateInput.value))}. <button class="undo">Undo</button>`
+    + made.map(c => ` <button class="undo" data-fill="${c.id}">Add ${TYPES[c.sport].toLowerCase()} details</button>`).join("");
   cheer(types[Math.floor(Math.random() * types.length)]);
   toast.querySelector(".undo").addEventListener("click", () => {
-    entries = entries.filter(x => x.id !== id); saveAll();
+    entries = entries.filter(x => x.id !== id);
+    const ids = new Set(made.map(c => c.id));
+    lifts.__cardio = (lifts.__cardio || []).filter(c => !ids.has(c.id));
+    saveAll();
     toast.textContent = "Session removed."; render();
   });
+  toast.querySelectorAll("[data-fill]").forEach(b => b.addEventListener("click", () => {
+    const c = (lifts.__cardio || []).find(x => x.id === b.dataset.fill);
+    if (c){ showTab("cardio"); openCardio(c.sport, c.id); }
+  }));
   picked = []; syncPicks();
   anchor = parse(dateInput.value);
   render();
@@ -812,7 +829,10 @@ function render(){
     `<li><div><div>${fmt(parse(x.date))}</div><div class="tags">${x.types.map(t => `<span class="tag ${t}" style="--c:var(--${t})">${TYPES[t]}</span>`).join("")}</div></div>
      <button class="del" data-id="${x.id}">Delete</button></li>`).join("");
   ul.querySelectorAll(".del").forEach(b => b.addEventListener("click", () => armDelete(b, () => {
-    entries = entries.filter(x => x.id !== b.dataset.id); saveAll(); render();
+    const gone = entries.find(x => x.id === b.dataset.id);
+    entries = entries.filter(x => x.id !== b.dataset.id);
+    if (gone) lifts.__cardio = (lifts.__cardio || []).filter(c => !(c.pending && c.date === gone.date && gone.types.includes(c.sport)));
+    saveAll(); render();
   })));
 }
 
@@ -1265,8 +1285,9 @@ function bwChart(m, n, mAll){
     ${vhi !== vlo ? `<text x="${L-6}" y="${Y(vlo)+3}" text-anchor="end">${kg1(vlo)}</text>` : ""}
     ${n.length > 1 ? `<path d="${path(n)}" fill="none" stroke="var(--legs)" stroke-width="2" stroke-dasharray="4 4"/>` : ""}
     ${n.map(x => `<circle cx="${X(x.date).toFixed(1)}" cy="${Y(x.kg).toFixed(1)}" r="2.5" fill="var(--legs)"/>`).join("")}
-    ${m.map(x => `<circle cx="${X(x.date).toFixed(1)}" cy="${Y(x.kg).toFixed(1)}" r="3.5" fill="var(--pull)" opacity=".35"/>`).join("")}
-    ${avg.length > 1 ? `<path d="${path(avg)}" fill="none" stroke="var(--pull)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>` : ""}
+    ${avg.length > 1 ? `<path d="${path(avg)}" fill="none" stroke="var(--pull)" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" opacity=".16"/>` : ""}
+    ${m.length > 1 ? `<path d="${path(m)}" fill="none" stroke="var(--pull)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>` : ""}
+    ${m.map(x => `<circle cx="${X(x.date).toFixed(1)}" cy="${Y(x.kg).toFixed(1)}" r="3.5" fill="var(--pull)" stroke="var(--surface)" stroke-width="1.5"/>`).join("")}
     <g id="bwSel"></g>
     <text x="${L}" y="${H-6}">${parse(iso(new Date(t0))).getDate()} ${MONTHS[new Date(t0).getMonth()]}</text>
     ${t1 !== t0 ? `<text x="${W-R}" y="${H-6}" text-anchor="end">${new Date(t1).getDate()} ${MONTHS[new Date(t1).getMonth()]}</text>` : ""}
@@ -1358,9 +1379,20 @@ const CSPORT = {
   box:    { name: "Boxing",   one: "session", many: "sessions", dist: null, rounds: true, chart: "time", chartName: "Time (min)" },
 };
 const CORDER = ["run", "bike", "swim", "tennis", "box"];
-let currentCardio = null;
+let currentCardio = null, cardioEdit = null;
+// sports picked on the Sessions tab show up here as "needs details" until you fill them in
+function addPendingCardio(date, types){
+  const made = [];
+  types.filter(t => CSPORT[t]).forEach((t, i) => {
+    if ((lifts.__cardio || []).some(c => c.date === date && c.sport === t)) return;
+    const c = { id: Date.now().toString(36) + "c" + i, sport: t, date, sec: 0, pending: true };
+    (lifts.__cardio = lifts.__cardio || []).push(c); made.push(c);
+  });
+  return made;
+}
 const cardioAll = () => (lifts.__cardio || []).slice().sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
-const cardioOf = sp => cardioAll().filter(x => x.sport === sp);
+const cardioOf = sp => cardioAll().filter(x => x.sport === sp && !x.pending);
+const pendingOf = sp => cardioAll().filter(x => x.sport === sp && x.pending);
 
 const dur = sec => {
   sec = Math.round(sec);
@@ -1392,15 +1424,15 @@ function metricText(x){
 
 /* ---- list page ---- */
 function renderCardio(){
-  const s0 = weekStart(new Date()), wk = cardioAll().filter(x => { const d = parse(x.date); return d >= s0 && d < addDays(s0, 7); });
+  const s0 = weekStart(new Date()), wk = cardioAll().filter(x => !x.pending).filter(x => { const d = parse(x.date); return d >= s0 && d < addDays(s0, 7); });
   const wkSec = wk.reduce((a, x) => a + x.sec, 0), wkKm = wk.reduce((a, x) => a + (CSPORT[x.sport].dist ? x.km : 0), 0);
   document.getElementById("cardioWeek").innerHTML = `
     <div><div class="cond">${wk.length}</div><p>${wk.length === 1 ? "workout" : "workouts"}</p></div>
     <div><div class="cond">${wkSec ? durWords(wkSec) : "0 min"}</div><p>total time</p></div>
     <div><div class="cond">${(Math.round(wkKm * 10) / 10)} km</div><p>distance</p></div>`;
   document.getElementById("cardioList").innerHTML = CORDER.map(k => {
-    const sp = CSPORT[k], list = cardioOf(k), last = list[list.length - 1];
-    const sub = last ? `${list.length} ${list.length === 1 ? sp.one : sp.many} · last ${[distText(last), dur(last.sec)].filter(Boolean).join(", ")}, ${ago(last.date)}` : `No ${sp.many} yet`;
+    const sp = CSPORT[k], list = cardioOf(k), last = list[list.length - 1], pend = pendingOf(k).length;
+    const sub = pend ? `<span class="needs">${pend} ${pend === 1 ? sp.one : sp.many} need${pend === 1 ? "s" : ""} details</span>` : last ? `${list.length} ${list.length === 1 ? sp.one : sp.many} · last ${[distText(last), dur(last.sec)].filter(Boolean).join(", ")}, ${ago(last.date)}` : `No ${sp.many} yet`;
     return `<button class="crow" data-sp="${k}" style="--c:var(--${k})">
       <span class="badge">${sportSvg(k)}</span>
       <span class="crow-txt"><b>${sp.name}</b><small>${sub}</small></span>
@@ -1413,12 +1445,17 @@ document.getElementById("cardioList").addEventListener("click", e => {
 });
 
 /* ---- one sport ---- */
-function openCardio(k){
+function openCardio(k, editId){
+  if (k !== currentCardio && editId === undefined) cardioEdit = null;
+  if (editId !== undefined) cardioEdit = editId;
   currentCardio = k;
-  const sp = CSPORT[k], list = cardioOf(k), last = list[list.length - 1];
+  const sp = CSPORT[k], list = cardioOf(k), last = list[list.length - 1], pend = pendingOf(k);
+  const editing = cardioEdit ? cardioAll().find(x => x.id === cardioEdit && x.sport === k) : null;
+  if (!editing) cardioEdit = null;
   const el = document.getElementById("cardioDetail");
-  const lastSec = last ? last.sec : (k === "run" ? 1800 : k === "bike" ? 3600 : 2700);
-  const lastDist = last && sp.dist ? (sp.dist === "m" ? Math.round(last.km * 1000) : Math.round(last.km * 100) / 100) : (sp.dist === "m" ? 1000 : k === "run" ? 5 : 20);
+  const src = editing && !editing.pending ? editing : last;
+  const lastSec = src ? src.sec : (k === "run" ? 1800 : k === "bike" ? 3600 : 2700);
+  const lastDist = src && sp.dist ? (sp.dist === "m" ? Math.round(src.km * 1000) : Math.round(src.km * 100) / 100) : (sp.dist === "m" ? 1000 : k === "run" ? 5 : 20);
 
   // stats
   const s0 = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
@@ -1440,10 +1477,16 @@ function openCardio(k){
   el.innerHTML = `<button class="back" id="cardioBack">‹ Cardio</button>
     <div class="dhead" style="--c:var(--${k})"><span class="badge big">${sportSvg(k)}</span><div><h1>${sp.name}</h1><div class="exsub">${list.length} ${list.length === 1 ? sp.one : sp.many} logged</div></div></div>
 
-    <section class="clog" style="--c:var(--${k})">
-      <h2>Log a ${sp.one}</h2>
+    ${pend.length && !editing ? `<section class="cpend" style="--c:var(--${k})">
+      <h2>Needs details</h2>
+      <p class="hint" style="margin:0 0 10px">From your sessions. Tap one to add the time${sp.dist ? " and distance" : ""}.</p>
+      ${pend.slice().reverse().map(x => `<button class="cpend-row" data-edit="${x.id}"><span><b>${fmt(parse(x.date))}</b><small>${sp.name}</small></span><span class="cpend-go">Add details ›</span></button>`).join("")}
+    </section>` : ""}
+    <section class="clog" style="--c:var(--${k})" id="cForm">
+      <h2>${editing ? (editing.pending ? `${sp.name} on ${fmt(parse(editing.date))}` : `Edit ${sp.one}`) : `Log a ${sp.one}`}</h2>
+      ${editing ? `<p class="hint" style="margin:-6px 0 12px">${editing.pending ? "Add the details from this workout." : "Change anything and save."} <button class="undo" id="cCancel">Cancel</button></p>` : ""}
       <label class="field" for="cDate">Date</label>
-      <input type="date" id="cDate" value="${iso(new Date())}">
+      <input type="date" id="cDate" value="${editing ? editing.date : iso(new Date())}">
       <label class="field">Time</label>
       <div class="tbox">
         <label><input id="cH" type="number" inputmode="numeric" min="0" value="${Math.floor(lastSec / 3600)}"><span>h</span></label>
@@ -1457,9 +1500,9 @@ function openCardio(k){
         <button data-d="1" aria-label="More distance">+</button>
       </div>` : ""}
       ${sp.rounds ? `<label class="field" for="cR">Rounds (optional)</label>
-      <input class="inp" id="cR" type="number" inputmode="numeric" min="0" placeholder="e.g. 6" value="${last && last.rounds ? last.rounds : ""}">` : ""}
+      <input class="inp" id="cR" type="number" inputmode="numeric" min="0" placeholder="e.g. 6" value="${src && src.rounds ? src.rounds : ""}">` : ""}
       <div class="cprev" id="cPrev"></div>
-      <button class="btn" id="cSave">Log ${sp.one}</button>
+      <button class="btn" id="cSave">${editing ? "Save" : `Log ${sp.one}`}</button>
       <div class="toast" id="cToast" role="status"></div>
     </section>
 
@@ -1477,12 +1520,14 @@ function openCardio(k){
     <section style="--c:var(--${k})">
       <h2>All ${sp.many}</h2>
       <ul class="clist">${list.slice().reverse().map(x => `<li>
-        <div><b>${[distText(x), dur(x.sec)].filter(Boolean).join(" · ")}</b>
+        <div class="cedit" data-edit="${x.id}"><b>${[distText(x), dur(x.sec)].filter(Boolean).join(" · ")}</b>
         <div class="exsub">${fmt(parse(x.date))}${metricText(x) ? " · " + metricText(x) : ""}</div></div>
         <button class="del" data-cid="${x.id}">Delete</button></li>`).join("")}</ul>
     </section>` : `<section><p class="empty">Your ${sp.many} will show up here with your times${sp.dist ? ", distances and speed" : ""}.</p></section>`}`;
 
-  el.querySelector("#cardioBack").addEventListener("click", () => showTab("cardio"));
+  el.querySelector("#cardioBack").addEventListener("click", () => { cardioEdit = null; showTab("cardio"); });
+  el.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => { openCardio(k, b.dataset.edit); document.getElementById("cForm").scrollIntoView({ behavior: "smooth", block: "start" }); }));
+  const cc = el.querySelector("#cCancel"); if (cc) cc.addEventListener("click", () => openCardio(k, null));
   const upd = () => {
     const sec = (+el.querySelector("#cH").value || 0) * 3600 + (+el.querySelector("#cM").value || 0) * 60 + (+el.querySelector("#cS").value || 0);
     const dEl = el.querySelector("#cDist"), dv = dEl ? parseFloat(dEl.value) || 0 : 0;
@@ -1502,10 +1547,13 @@ function openCardio(k){
     const x = upd(), date = el.querySelector("#cDate").value, toast = el.querySelector("#cToast");
     if (!date || x.sec <= 0){ toast.textContent = "Enter how long it took first."; return; }
     if (sp.dist && !(x.km > 0)){ toast.textContent = "Enter the distance first."; return; }
-    const entry = { id: Date.now().toString(36), sport: k, date, sec: x.sec };
+    const wasEditing = cardioEdit && (lifts.__cardio || []).find(c => c.id === cardioEdit);
+    const entry = wasEditing || { id: Date.now().toString(36), sport: k };
+    entry.date = date; entry.sec = x.sec; delete entry.pending;
     if (sp.dist) entry.km = Math.round(x.km * 1000) / 1000;
-    if (sp.rounds && x.rounds) entry.rounds = x.rounds;
-    (lifts.__cardio = lifts.__cardio || []).push(entry);
+    if (sp.rounds){ if (x.rounds) entry.rounds = x.rounds; else delete entry.rounds; }
+    if (!wasEditing) (lifts.__cardio = lifts.__cardio || []).push(entry);
+    cardioEdit = null;
     // also mark it on that day's session
     const ses = entries.find(e => e.date === date);
     if (ses){ if (!ses.types.includes(k)) ses.types = [...ses.types, k].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b)); }
@@ -1522,7 +1570,7 @@ function openCardio(k){
 
   document.getElementById("tab-cardio").hidden = true;
   el.hidden = false;
-  window.scrollTo(0, 0);
+  if (!editing) window.scrollTo(0, 0);
 }
 
 /* ================= sync to GitHub ================= */
