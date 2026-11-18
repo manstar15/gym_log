@@ -397,6 +397,30 @@ textarea,select,input{font-size:max(16px,1em)}
 /* keep the page in its own layer stack so nothing can paint over the panels (iPhone Safari bug) */
 main{position:relative;z-index:0;isolation:isolate}
 /* ===== sleep ===== */
+.sbig-wrap{text-align:center;padding:28px 18px 18px}
+.sbig{position:relative;width:min(230px,64vw);aspect-ratio:1;border-radius:50%;border:0;margin:4px auto 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  font:inherit;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  background:radial-gradient(circle at 32% 26%,color-mix(in srgb,var(--sleep) 70%,#fff),var(--sleep) 55%,color-mix(in srgb,var(--sleep) 65%,#000));
+  box-shadow:0 22px 50px -20px var(--sleep),inset 0 -8px 20px rgba(0,0,0,.18);transition:transform .2s cubic-bezier(.25,1,.5,1)}
+.sbig:active{transform:scale(.965)}
+.sbig::after{content:"";position:absolute;inset:-10px;border-radius:50%;border:2px solid var(--sleep);opacity:0;pointer-events:none}
+.sbig-ic{width:46px;height:46px;display:grid;place-items:center}
+.sbig-ic svg{width:42px;height:42px}
+.sbig b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:2rem;line-height:1;font-variant-numeric:tabular-nums}
+.sbig small{font-size:.82rem;opacity:.85;max-width:80%;line-height:1.35;white-space:pre-line}
+.sbig.on{background:radial-gradient(circle at 50% 30%,#2a2b5a,#14152e 70%);box-shadow:0 22px 50px -24px var(--sleep),inset 0 0 0 2px color-mix(in srgb,var(--sleep) 60%,transparent)}
+.sbig.on::before{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;opacity:.8;background:
+  radial-gradient(1.5px 1.5px at 30% 25%,#fff,transparent),radial-gradient(1px 1px at 70% 20%,#fff,transparent),
+  radial-gradient(1.2px 1.2px at 78% 62%,#fff,transparent),radial-gradient(1px 1px at 22% 68%,#fff,transparent),radial-gradient(1px 1px at 55% 82%,#fff,transparent)}
+.sbig.on b{font-size:2.6rem}
+.sbig.on .sbig-ic{color:#ffd66b}
+.sbig.on::after{animation:sBreathe 3.6s ease-in-out infinite}
+@keyframes sBreathe{0%,100%{opacity:0;transform:scale(.96)}50%{opacity:.6;transform:scale(1.02)}}
+.sbig.just{animation:sPop .45s cubic-bezier(.25,1,.5,1)}
+.sbig-links{display:flex;flex-direction:column;align-items:center;gap:2px}
+.sbig-links .undo{color:var(--muted);font-weight:600;font-size:.9rem}
+#sCancel{color:var(--down)}
+@media (prefers-reduced-motion:reduce){.sbig.on::after{animation:none;opacity:.4}}
 #tab-sleep:not([hidden]){animation:fadeUp .32s ease backwards}
 .slog{position:relative;overflow:hidden;background:
   radial-gradient(120% 70% at 85% -10%,color-mix(in srgb,var(--sleep) 30%,transparent),transparent 65%),var(--surface)}
@@ -593,7 +617,19 @@ main{position:relative;z-index:0;isolation:isolate}
   <!-- SLEEP -->
   <div id="tab-sleep" hidden>
     <h1>Sleep</h1>
-    <section class="slog" aria-label="Log your sleep">
+    <section class="slog sbig-wrap" aria-label="Sleep button">
+      <button class="sbig" id="sBig">
+        <span class="sbig-ic" id="sBigIc"></span>
+        <b id="sBigT">Start sleep</b>
+        <small id="sBigS">Tap when you go to bed</small>
+      </button>
+      <p class="slabel" id="sBigMsg"></p>
+      <div class="sbig-links">
+        <button class="undo" id="sCancel" hidden>Cancel this sleep</button>
+        <button class="undo" id="sManualBtn">Add or fix a night by hand</button>
+      </div>
+    </section>
+    <section class="slog" id="sForm" aria-label="Add or fix a night" hidden>
       <div class="snight">
         <button class="snav" id="sPrev" aria-label="Previous night"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
         <div class="snight-txt"><b id="sTitle">Last night</b><small id="sSub"></small></div>
@@ -1505,6 +1541,75 @@ function renderBody(){
 document.querySelector(`#bwKind button[data-k="${bwKind}"]`).click();
 
 /* ================= sleep ================= */
+const MOON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>`;
+const SUN = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></svg>`;
+// a running sleep is kept (and synced) until you wake up
+const sActive = () => (lifts.__sleepRun || []).filter(x => !x.end).sort((a, b) => a.start.localeCompare(b.start)).pop();
+const minsTxt = m => m < 60 ? `${m}m` : `${Math.floor(m / 60)}h ${pad(m % 60)}m`;
+function renderBig(){
+  const a = sActive(), btn = document.getElementById("sBig");
+  btn.classList.toggle("on", !!a);
+  document.getElementById("sCancel").hidden = !a;
+  if (a){
+    const st = new Date(a.start), mins = Math.max(0, Math.floor((Date.now() - st) / 60000));
+    const sameDay = iso(st) === iso(new Date());
+    document.getElementById("sBigIc").innerHTML = SUN;
+    document.getElementById("sBigT").textContent = minsTxt(mins);
+    document.getElementById("sBigS").textContent = `Asleep since ${sameDay ? "" : DOW[st.getDay()] + " "}${tstr(st.getHours() * 60 + st.getMinutes())}\nTap to wake up`;
+  } else {
+    document.getElementById("sBigIc").innerHTML = MOON;
+    document.getElementById("sBigT").textContent = "Start sleep";
+    document.getElementById("sBigS").textContent = "Tap when you go to bed";
+  }
+}
+document.getElementById("sBig").addEventListener("click", () => {
+  const a = sActive(), msg = document.getElementById("sBigMsg"), now = new Date();
+  msg.classList.remove("warn");
+  if (!a){
+    (lifts.__sleepRun = lifts.__sleepRun || []).push({ id: Date.now().toString(36), start: now.toISOString() });
+    msg.textContent = "Good night. Tap again when you wake up.";
+  } else {
+    a.end = now.toISOString();
+    const st = new Date(a.start), mins = Math.round((now - st) / 60000);
+    if (mins < 5){
+      a.cancelled = true;
+      msg.textContent = "That was under 5 minutes, so it wasn’t saved."; msg.classList.add("warn");
+    } else {
+      const id = iso(now), bed = tstr(st.getHours() * 60 + st.getMinutes()), wake = tstr(now.getHours() * 60 + now.getMinutes());
+      lifts.__sleep = (lifts.__sleep || []).filter(x => x.id !== id);
+      lifts.__sleep.push({ id, bed, wake });
+      msg.textContent = `${now.getHours() >= 4 && now.getHours() < 12 ? "Good morning! " : ""}You slept ${minsTxt(mins)} (${bed} → ${wake}).`;
+    }
+  }
+  // keep only the last few runs
+  lifts.__sleepRun = (lifts.__sleepRun || []).filter(x => !x.end || Date.now() - new Date(x.end) < 3 * 864e5);
+  saveAll();
+  const btn = document.getElementById("sBig");
+  btn.classList.remove("just"); void btn.offsetWidth; btn.classList.add("just");
+  renderSleep();
+});
+document.getElementById("sCancel").addEventListener("click", e => {
+  const b = e.currentTarget;
+  if (!b.classList.contains("sure")){
+    b.classList.add("sure"); b.textContent = "Tap again to cancel";
+    setTimeout(() => { b.classList.remove("sure"); b.textContent = "Cancel this sleep"; }, 3000);
+    return;
+  }
+  b.classList.remove("sure"); b.textContent = "Cancel this sleep";
+  const a = sActive(); if (!a) return;
+  a.end = new Date().toISOString(); a.cancelled = true;
+  saveAll(); renderSleep();
+  document.getElementById("sBigMsg").textContent = "Sleep cancelled.";
+});
+document.getElementById("sManualBtn").addEventListener("click", () => {
+  const f = document.getElementById("sForm");
+  f.hidden = !f.hidden;
+  document.getElementById("sManualBtn").textContent = f.hidden ? "Add or fix a night by hand" : "Hide";
+  if (!f.hidden){ fillSleepForm(); f.scrollIntoView({ behavior: "smooth", block: "start" }); }
+});
+setInterval(() => { if (tab === "sleep" && document.visibilityState === "visible" && sActive()) renderBig(); }, 20000);
+document.addEventListener("visibilitychange", () => { if (tab === "sleep" && document.visibilityState === "visible") renderBig(); });
+
 const SLEEP_GOAL = 480;                        // 8 hours, in minutes
 const SLEEP_C = 2 * Math.PI * 52;              // ring length
 let sDate = null, sRange = 7, sView = "hours", sPick = null, sPts = null;
@@ -1611,6 +1716,7 @@ function openSleep(){
   renderSleep();
 }
 function renderSleep(){
+  renderBig();
   document.getElementById("sNext").disabled = !sDate || sDate >= sMax();
   // stats: last 7 nights
   const today = iso(new Date()), from = iso(addDays(new Date(), -6));
@@ -1644,8 +1750,11 @@ function renderSleep(){
       <button class="del" data-sdel="${x.id}">Delete</button></li>`;
   }).join("");
   ul.querySelectorAll("[data-night]").forEach(el => el.addEventListener("click", () => {
-    sDate = el.dataset.night; fillSleepForm();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    sDate = el.dataset.night;
+    const f = document.getElementById("sForm"); f.hidden = false;
+    document.getElementById("sManualBtn").textContent = "Hide";
+    fillSleepForm();
+    f.scrollIntoView({ behavior: "smooth", block: "start" });
   }));
   ul.querySelectorAll("[data-sdel]").forEach(b => b.addEventListener("click", () => armDelete(b, () => {
     lifts.__sleep = (lifts.__sleep || []).filter(x => x.id !== b.dataset.sdel);
