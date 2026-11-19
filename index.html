@@ -408,12 +408,8 @@ main{position:relative;z-index:0;isolation:isolate}
 .sbig-ic svg{width:42px;height:42px}
 .sbig b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:2rem;line-height:1;font-variant-numeric:tabular-nums}
 .sbig small{font-size:.82rem;opacity:.85;max-width:80%;line-height:1.35;white-space:pre-line}
-.sbig.on{background:radial-gradient(circle at 50% 30%,#2a2b5a,#14152e 70%);box-shadow:0 22px 50px -24px var(--sleep),inset 0 0 0 2px color-mix(in srgb,var(--sleep) 60%,transparent)}
-.sbig.on::before{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;opacity:.8;background:
-  radial-gradient(1.5px 1.5px at 30% 25%,#fff,transparent),radial-gradient(1px 1px at 70% 20%,#fff,transparent),
-  radial-gradient(1.2px 1.2px at 78% 62%,#fff,transparent),radial-gradient(1px 1px at 22% 68%,#fff,transparent),radial-gradient(1px 1px at 55% 82%,#fff,transparent)}
+.sbig.on{box-shadow:0 22px 50px -24px var(--sleep)}
 .sbig.on b{font-size:2.6rem}
-.sbig.on .sbig-ic{color:#ffd66b}
 .sbig.on::after{animation:sBreathe 3.6s ease-in-out infinite}
 @keyframes sBreathe{0%,100%{opacity:0;transform:scale(.96)}50%{opacity:.6;transform:scale(1.02)}}
 .sbig.just{animation:sPop .45s cubic-bezier(.25,1,.5,1)}
@@ -488,6 +484,105 @@ main{position:relative;z-index:0;isolation:isolate}
 .slist .sl-l{flex:1;min-width:0;cursor:pointer}
 .slist .sl-d{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:1.35rem;white-space:nowrap}
 .slist .sl-d.part{font-family:inherit;font-weight:600;font-size:.85rem;color:var(--muted)}
+/* ===== sleep / wake-up scenes ===== */
+.skyfx{position:fixed;inset:0;z-index:70;overflow:hidden;opacity:0;transition:opacity .55s ease;touch-action:none;-webkit-tap-highlight-color:transparent;color:#fff}
+.skyfx.show{opacity:1}
+.skyfx .sky{position:absolute;inset:0}
+.sky.night{background:linear-gradient(180deg,#05061a 0%,#11163a 55%,#2b2453 100%)}
+.sky.dawn{background:linear-gradient(180deg,#3b2f72 0%,#a3517f 42%,#f08a5d 72%,#ffd193 100%);opacity:0}
+.sky.day{background:linear-gradient(180deg,#4a9be6 0%,#8fc8f3 50%,#ffe6b5 100%);opacity:0}
+.stars{position:absolute;inset:0 0 35% 0}
+.stars i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;opacity:0;animation:twinkle 2.6s ease-in-out infinite}
+.stars i.b{width:3px;height:3px;box-shadow:0 0 6px #fff}
+@keyframes twinkle{0%,100%{opacity:.25}50%{opacity:1}}
+.moon{position:absolute;top:13%;right:16%;width:64px;height:64px;border-radius:50%;
+  background:radial-gradient(circle at 36% 34%,#fffdf3,#f1ecd2 60%,#d9d3b5);box-shadow:0 0 40px 10px rgba(255,250,220,.25)}
+.moon::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 70% 60%,rgba(0,0,0,.08) 0 8%,transparent 9%),radial-gradient(circle at 40% 70%,rgba(0,0,0,.07) 0 6%,transparent 7%)}
+.sun{position:absolute;left:50%;top:15%;width:120px;height:120px;margin-left:-60px;transform:translateY(80vh)}
+.sun .disc{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 42% 38%,#fff7c8,#ffd25c 45%,#ffad33);box-shadow:0 0 60px 24px rgba(255,200,90,.55),0 0 140px 60px rgba(255,170,80,.3)}
+.sun .rays{position:absolute;inset:-90px;border-radius:50%;opacity:.5;
+  background:repeating-conic-gradient(from 0deg,rgba(255,236,170,.55) 0deg 5deg,transparent 5deg 22.5deg);
+  -webkit-mask:radial-gradient(circle,#000 30%,transparent 70%);mask:radial-gradient(circle,#000 30%,transparent 70%);animation:spin 40s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hills{position:absolute;left:0;right:0;bottom:0;width:100%;height:30vh}
+.hills .hb{fill:#131634}
+.hills .hf{fill:#0b0d24}
+.birds{position:absolute;top:30%;left:0;width:100%;height:60px;opacity:0;pointer-events:none}
+.birds svg{position:absolute;width:22px;height:9px;fill:none;stroke:#2b3a55;stroke-width:1.6;stroke-linecap:round}
+.birds svg:nth-child(1){left:-30px;top:10px}
+.birds svg:nth-child(2){left:-60px;top:26px;width:16px}
+.birds svg:nth-child(3){left:-48px;top:0;width:13px}
+.gn{position:absolute;left:24px;right:24px;top:46%;text-align:center;opacity:0}
+.gn b{display:block;font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:3rem;line-height:1}
+.gn small{display:block;margin-top:10px;opacity:.75;font-size:.95rem}
+.wcard{position:absolute;left:16px;right:16px;bottom:calc(22px + env(safe-area-inset-bottom,0px));max-width:480px;margin:0 auto;
+  background:rgba(255,255,255,.9);color:#1E2124;border-radius:28px;padding:22px 20px 18px;text-align:center;box-shadow:0 30px 60px -25px rgba(60,40,10,.45);opacity:0;display:none}
+.w-hi{margin:0;font-weight:600;color:#c46a1c;font-size:1rem}
+.w-hours{display:block;font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:4.2rem;line-height:1;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.w-times{margin:0 0 14px;color:#5f646a;font-size:.95rem}
+.w-bar{position:relative;height:10px;border-radius:5px;background:#ece7dd;overflow:hidden;margin:0 4px}
+.w-bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:5px;background:linear-gradient(90deg,#ffb347,#ff7e5f);transition:width 1.2s cubic-bezier(.25,1,.5,1)}
+.w-bar i.full{background:linear-gradient(90deg,#3FAE6E,#7bd389)}
+.w-bar span{position:absolute;right:6px;top:-18px;font-size:.7rem;color:#8a8f94}
+.w-lbl{margin:10px 0 14px;font-weight:600;color:#3a3f45;min-height:1.3em}
+.wcard .btn{background:#1E2124;color:#fff}
+
+/* going to sleep: fade into the night */
+.skyfx.to-night .sky.dawn,.skyfx.to-night .sky.day,.skyfx.to-night .sun,.skyfx.to-night .birds{display:none}
+.skyfx.to-night .moon{opacity:0;transform:translateY(40px)}
+.skyfx.to-night.run .moon{animation:moonRise 1.6s .25s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes moonRise{to{opacity:1;transform:none}}
+.skyfx.to-night .stars i{animation-name:twinkleIn}
+@keyframes twinkleIn{0%{opacity:0}40%{opacity:1}70%{opacity:.4}100%{opacity:.9}}
+.skyfx.to-night.run .gn{animation:riseIn .8s .6s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes riseIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.skyfx.to-night .hills{transform:translateY(30%);transition:transform 1.4s cubic-bezier(.2,.8,.2,1)}
+.skyfx.to-night.run .hills{transform:none}
+
+/* waking up: sunrise */
+.skyfx.to-day .gn{display:none}
+.skyfx.to-day .wcard{display:block}
+.skyfx.to-day.run .sky.dawn{animation:fadeTo 1.5s .5s ease forwards}
+.skyfx.to-day.run .sky.day{animation:fadeTo 1.6s 1.9s ease forwards}
+@keyframes fadeTo{to{opacity:1}}
+.skyfx.to-day.run .stars{animation:fadeOut 1.4s .3s ease forwards}
+@keyframes fadeOut{to{opacity:0}}
+.skyfx.to-day.run .moon{animation:moonSet 1.8s .2s cubic-bezier(.5,0,.7,.4) forwards}
+@keyframes moonSet{to{opacity:0;transform:translate(30px,70px)}}
+.skyfx.to-day.run .sun{animation:sunRise 2.8s .5s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes sunRise{0%{transform:translateY(80vh) scale(.85)}100%{transform:none}}
+.skyfx.to-day.run .hills .hb{animation:hillB 3s .4s ease forwards}
+.skyfx.to-day.run .hills .hf{animation:hillF 3s .4s ease forwards}
+@keyframes hillB{50%{fill:#6b3f63}100%{fill:#5c9a6a}}
+@keyframes hillF{50%{fill:#45304f}100%{fill:#3e7d55}}
+.skyfx.to-day.run .birds{animation:fadeTo .6s 2.6s forwards}
+.skyfx.to-day.run .birds svg{animation:fly 7s 2.6s linear forwards}
+.skyfx.to-day.run .birds svg:nth-child(2){animation-duration:8s;animation-delay:2.9s}
+.skyfx.to-day.run .birds svg:nth-child(3){animation-duration:7.5s;animation-delay:3.1s}
+@keyframes fly{0%{transform:translate(0,0)}25%{transform:translate(28vw,-8px)}50%{transform:translate(56vw,4px)}75%{transform:translate(84vw,-6px)}100%{transform:translate(120vw,2px)}}
+.skyfx.to-day.run .wcard{animation:cardUp .8s 2.3s cubic-bezier(.2,.9,.25,1) forwards}
+@keyframes cardUp{from{opacity:0;transform:translateY(40px) scale(.97)}to{opacity:1;transform:none}}
+
+/* the sleep button morphs between day and night */
+.sbig{isolation:isolate}
+.sbig-night{position:absolute;inset:0;border-radius:50%;z-index:-1;opacity:0;transition:opacity .8s ease;
+  background:radial-gradient(1.5px 1.5px at 30% 25%,#fff,transparent),radial-gradient(1px 1px at 70% 20%,#fff,transparent),
+  radial-gradient(1.2px 1.2px at 78% 62%,#fff,transparent),radial-gradient(1px 1px at 22% 68%,#fff,transparent),radial-gradient(1px 1px at 55% 82%,#fff,transparent),
+  radial-gradient(circle at 50% 30%,#2a2b5a,#14152e 70%);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--sleep) 60%,transparent)}
+.sbig.on .sbig-night{opacity:1}
+.sbig{transition:transform .2s cubic-bezier(.25,1,.5,1),box-shadow .8s ease}
+.sbig-ic{position:relative}
+.sbig-ic i{position:absolute;inset:0;display:grid;place-items:center;transition:opacity .6s ease,transform .8s cubic-bezier(.25,1,.5,1)}
+.sbig-ic .ic-sun{opacity:0;transform:rotate(-90deg) scale(.5);color:#ffd66b}
+.sbig.on .sbig-ic .ic-moon{opacity:0;transform:rotate(90deg) scale(.5)}
+.sbig.on .sbig-ic .ic-sun{opacity:1;transform:none}
+.sbig .swap{animation:textSwap .5s cubic-bezier(.25,1,.5,1)}
+@keyframes textSwap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#sChart rect.g{transform-box:fill-box;transform-origin:50% 100%;animation:barUp .55s cubic-bezier(.25,1,.5,1) backwards}
+#sChart.sched rect.g{transform-origin:50% 0}
+@keyframes barUp{from{transform:scaleY(0)}to{transform:none}}
+.sstat{animation:fadeUp .4s ease backwards}
+@media (prefers-reduced-motion:reduce){.sbig-ic i,.sbig-night,.skyfx{transition:none}#sChart rect.g,.sbig .swap{animation:none}}
 </style>
 </head>
 <body>
@@ -619,7 +714,8 @@ main{position:relative;z-index:0;isolation:isolate}
     <h1>Sleep</h1>
     <section class="slog sbig-wrap" aria-label="Sleep button">
       <button class="sbig" id="sBig">
-        <span class="sbig-ic" id="sBigIc"></span>
+        <span class="sbig-night" aria-hidden="true"></span>
+        <span class="sbig-ic" id="sBigIc"><i class="ic-moon"></i><i class="ic-sun"></i></span>
         <b id="sBigT">Start sleep</b>
         <small id="sBigS">Tap when you go to bed</small>
       </button>
@@ -783,6 +879,31 @@ main{position:relative;z-index:0;isolation:isolate}
     <div id="cheerBig" class="cheer-big st" style="--d:.38s"></div>
     <p id="cheerSub" class="st" style="--d:.46s"></p>
     <button class="btn st" id="cheerBtn" style="--d:.54s">Let’s go</button>
+  </div>
+</div>
+
+<div class="skyfx" id="skyfx" hidden aria-live="polite">
+  <div class="sky night"></div><div class="sky dawn"></div><div class="sky day"></div>
+  <div class="stars" id="skyStars" aria-hidden="true"></div>
+  <div class="moon" aria-hidden="true"></div>
+  <div class="sun" aria-hidden="true"><div class="rays"></div><div class="disc"></div></div>
+  <svg class="hills" viewBox="0 0 400 160" preserveAspectRatio="none" aria-hidden="true">
+    <path class="hb" d="M0 70 C60 30 120 40 170 62 C230 88 280 30 400 52 L400 160 L0 160 Z"/>
+    <path class="hf" d="M0 108 C70 80 130 92 200 104 C270 116 330 76 400 92 L400 160 L0 160 Z"/>
+  </svg>
+  <div class="birds" aria-hidden="true">
+    <svg viewBox="0 0 20 8"><path d="M1 6 Q5 1 10 5 Q15 1 19 6"/></svg>
+    <svg viewBox="0 0 20 8"><path d="M1 6 Q5 1 10 5 Q15 1 19 6"/></svg>
+    <svg viewBox="0 0 20 8"><path d="M1 6 Q5 1 10 5 Q15 1 19 6"/></svg>
+  </div>
+  <div class="gn" id="skyGn"><b>Good night</b><small>Sleep well. Tap the button again when you wake up.</small></div>
+  <div class="wcard" id="skyCard">
+    <p class="w-hi" id="wHi">Good morning</p>
+    <b class="w-hours" id="wHours">0m</b>
+    <p class="w-times" id="wTimes"></p>
+    <div class="w-bar"><i id="wBar"></i><span>8h</span></div>
+    <p class="w-lbl" id="wLbl"></p>
+    <button class="btn" id="wBtn">Start the day</button>
   </div>
 </div>
 
@@ -1546,28 +1667,35 @@ const SUN = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-w
 // a running sleep is kept (and synced) until you wake up
 const sActive = () => (lifts.__sleepRun || []).filter(x => !x.end).sort((a, b) => a.start.localeCompare(b.start)).pop();
 const minsTxt = m => m < 60 ? `${m}m` : `${Math.floor(m / 60)}h ${pad(m % 60)}m`;
+let bigState = null;
 function renderBig(){
   const a = sActive(), btn = document.getElementById("sBig");
+  const ic = document.getElementById("sBigIc");
+  if (!ic.querySelector(".ic-moon").innerHTML){ ic.querySelector(".ic-moon").innerHTML = MOON; ic.querySelector(".ic-sun").innerHTML = SUN; }
+  if (bigState !== null && bigState !== !!a){
+    ["sBigT", "sBigS"].forEach(id => { const el = document.getElementById(id); el.classList.remove("swap"); void el.offsetWidth; el.classList.add("swap"); });
+  }
+  bigState = !!a;
   btn.classList.toggle("on", !!a);
   document.getElementById("sCancel").hidden = !a;
   if (a){
     const st = new Date(a.start), mins = Math.max(0, Math.floor((Date.now() - st) / 60000));
     const sameDay = iso(st) === iso(new Date());
-    document.getElementById("sBigIc").innerHTML = SUN;
     document.getElementById("sBigT").textContent = minsTxt(mins);
     document.getElementById("sBigS").textContent = `Asleep since ${sameDay ? "" : DOW[st.getDay()] + " "}${tstr(st.getHours() * 60 + st.getMinutes())}\nTap to wake up`;
   } else {
-    document.getElementById("sBigIc").innerHTML = MOON;
     document.getElementById("sBigT").textContent = "Start sleep";
     document.getElementById("sBigS").textContent = "Tap when you go to bed";
   }
 }
 document.getElementById("sBig").addEventListener("click", () => {
   const a = sActive(), msg = document.getElementById("sBigMsg"), now = new Date();
+  let scene = null;
   msg.classList.remove("warn");
   if (!a){
     (lifts.__sleepRun = lifts.__sleepRun || []).push({ id: Date.now().toString(36), start: now.toISOString() });
     msg.textContent = "Good night. Tap again when you wake up.";
+    scene = () => nightScene();
   } else {
     a.end = now.toISOString();
     const st = new Date(a.start), mins = Math.round((now - st) / 60000);
@@ -1576,6 +1704,9 @@ document.getElementById("sBig").addEventListener("click", () => {
       msg.textContent = "That was under 5 minutes, so it wasn’t saved."; msg.classList.add("warn");
     } else {
       const id = iso(now), bed = tstr(st.getHours() * 60 + st.getMinutes()), wake = tstr(now.getHours() * 60 + now.getMinutes());
+      const prev = sleepAll().filter(x => x.bed && x.wake && x.id < id).slice(-7);
+      const prevAvg = prev.length ? Math.round(prev.reduce((t, x) => t + sdur(x.bed, x.wake), 0) / prev.length) : null;
+      scene = () => wakeScene(mins, bed, wake, prevAvg);
       lifts.__sleep = (lifts.__sleep || []).filter(x => x.id !== id);
       lifts.__sleep.push({ id, bed, wake });
       msg.textContent = `${now.getHours() >= 4 && now.getHours() < 12 ? "Good morning! " : ""}You slept ${minsTxt(mins)} (${bed} → ${wake}).`;
@@ -1586,7 +1717,9 @@ document.getElementById("sBig").addEventListener("click", () => {
   saveAll();
   const btn = document.getElementById("sBig");
   btn.classList.remove("just"); void btn.offsetWidth; btn.classList.add("just");
+  sAnim = true;
   renderSleep();
+  if (scene){ skyStarted = performance.now(); scene(); }
 });
 document.getElementById("sCancel").addEventListener("click", e => {
   const b = e.currentTarget;
@@ -1612,7 +1745,7 @@ document.addEventListener("visibilitychange", () => { if (tab === "sleep" && doc
 
 const SLEEP_GOAL = 480;                        // 8 hours, in minutes
 const SLEEP_C = 2 * Math.PI * 52;              // ring length
-let sDate = null, sRange = 7, sView = "hours", sPick = null, sPts = null;
+let sDate = null, sRange = 7, sView = "hours", sPick = null, sPts = null, sAnim = true;
 const tmin = t => { if (!t) return null; const [h, m] = String(t).split(":").map(Number); return isNaN(h) ? null : h * 60 + (m || 0); };
 const tstr = m => { m = ((Math.round(m) % 1440) + 1440) % 1440; return `${pad(Math.floor(m / 60))}:${pad(m % 60)}`; };
 const sdur = (bed, wake) => { const b = tmin(bed), w = tmin(wake); if (b == null || w == null) return null; return ((w - b) % 1440 + 1440) % 1440 || null; };
@@ -1700,18 +1833,18 @@ document.getElementById("sSave").addEventListener("click", () => {
   setTimeout(() => { if (save.classList.contains("sdone")) sPreview(); }, 1500);
 });
 document.querySelectorAll("#sRange button").forEach(b => b.addEventListener("click", () => {
-  sRange = Number(b.dataset.r);
+  sRange = Number(b.dataset.r); sAnim = true;
   document.querySelectorAll("#sRange button").forEach(x => x.setAttribute("aria-selected", x === b));
   renderSleepChart();
 }));
 document.querySelectorAll("#sView button").forEach(b => b.addEventListener("click", () => {
-  sView = b.dataset.v;
+  sView = b.dataset.v; sAnim = true;
   document.querySelectorAll("#sView button").forEach(x => x.setAttribute("aria-selected", x === b));
   renderSleepChart();
 }));
 
 function openSleep(){
-  sDate = sMax();
+  sDate = sMax(); sAnim = true;
   fillSleepForm();
   renderSleep();
 }
@@ -1789,7 +1922,7 @@ function renderSleepChart(){
       if (!r.dur) return `<circle cx="${cx(i).toFixed(1)}" cy="${Y(0) - 4}" r="2" fill="var(--empty)"/>`;
       const y = Y(r.dur), h = Y(0) - y, rx = Math.min(bw / 2, 6);
       const good = r.dur >= 420;
-      return `<rect x="${(cx(i) - bw / 2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${rx}"
+      return `<rect ${sAnim ? `class="g" style="animation-delay:${(i * .025).toFixed(3)}s"` : ""} x="${(cx(i) - bw / 2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${rx}"
         fill="${good ? "var(--sleep)" : "color-mix(in srgb,var(--sleep) 45%,var(--surface))"}" ${r.date === sPick ? `stroke="var(--ink)" stroke-width="2"` : ""}/>`;
     }).join("");
   } else {
@@ -1811,7 +1944,7 @@ function renderSleepChart(){
       const s = byDate[r.date];
       if (!s) return "";
       const y1 = Y(s.b), y2 = Y(s.w), rx = Math.min(bw / 2, 6);
-      return `<rect x="${(cx(i) - bw / 2).toFixed(1)}" y="${y1.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(2, y2 - y1).toFixed(1)}" rx="${rx}"
+      return `<rect ${sAnim ? `class="g" style="animation-delay:${(i * .025).toFixed(3)}s"` : ""} x="${(cx(i) - bw / 2).toFixed(1)}" y="${y1.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(2, y2 - y1).toFixed(1)}" rx="${rx}"
         fill="var(--sleep)" ${r.date === sPick ? `stroke="var(--ink)" stroke-width="2"` : ""}/>`;
     }).join("");
   }
@@ -1825,6 +1958,8 @@ function renderSleepChart(){
     return `<text x="${x.toFixed(1)}" y="${H - 6}" text-anchor="${anchor}" ${r.date === iso(new Date()) ? `style="fill:var(--ink);font-weight:600"` : ""}>${txt}</text>`;
   }).join("");
   sPts = { W, rows: rows.map((r, i) => ({ ...r, x: cx(i) })) };
+  box.classList.toggle("sched", sView !== "hours");
+  sAnim = false;
   box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Sleep over time">${grid}${bars}${labels}</svg>
     <div class="bwtip hint" id="sTip">Tap a night to see the details</div>`;
   if (sPick && sPts.rows.some(r => r.date === sPick && r.e)) showSleepNight(sPick); else sPick = null;
@@ -2347,6 +2482,60 @@ go.addEventListener("click", () => {
   go.hidden = true;
 });
 
+/* ---- sleep / wake-up scenes ---- */
+const skyfx = document.getElementById("skyfx");
+let skyTimer = null, skyCount = null, skyStarted = 0;
+(() => {   // scatter the stars once
+  const box = document.getElementById("skyStars");
+  box.innerHTML = Array.from({ length: 46 }, (_, i) =>
+    `<i class="${i % 7 === 0 ? "b" : ""}" style="left:${(Math.random() * 100).toFixed(1)}%;top:${(Math.random() * 100).toFixed(1)}%;animation-delay:${(Math.random() * 2.6).toFixed(2)}s;animation-duration:${(2 + Math.random() * 2.5).toFixed(2)}s"></i>`).join("");
+})();
+function playScene(mode){
+  if (reduceMotion()) return false;
+  clearTimeout(skyTimer); cancelAnimationFrame(skyCount);
+  skyfx.className = `skyfx to-${mode}`;
+  skyfx.hidden = false;
+  void skyfx.offsetWidth;
+  requestAnimationFrame(() => requestAnimationFrame(() => skyfx.classList.add("show", "run")));
+  return true;
+}
+function closeScene(){
+  if (skyfx.hidden || !skyfx.classList.contains("show")) return;
+  clearTimeout(skyTimer);
+  skyfx.classList.remove("show");
+  skyTimer = setTimeout(() => { skyfx.hidden = true; skyfx.className = "skyfx"; }, 560);
+}
+function nightScene(){
+  if (!playScene("night")) return;
+  skyTimer = setTimeout(closeScene, 3000);
+}
+function wakeScene(mins, bed, wake, prevAvg){
+  const now = new Date();
+  document.getElementById("wHi").textContent = now.getHours() >= 4 && now.getHours() < 12 ? "Good morning ☀️" : "Welcome back ☀️";
+  document.getElementById("wTimes").textContent = `${bed} → ${wake}`;
+  const [lbl] = sleepLabel(mins);
+  let extra = "";
+  if (prevAvg){ const d = mins - prevAvg; if (Math.abs(d) >= 5) extra = ` · ${minsTxt(Math.abs(d))} ${d > 0 ? "more" : "less"} than usual`; }
+  document.getElementById("wLbl").textContent = lbl + extra;
+  const hours = document.getElementById("wHours"), bar = document.getElementById("wBar");
+  hours.textContent = "0m"; bar.style.width = "0"; bar.classList.toggle("full", mins >= SLEEP_GOAL);
+  if (!playScene("day")) return;
+  // count the hours up once the card arrives
+  skyTimer = setTimeout(() => {
+    bar.style.width = Math.min(100, mins / SLEEP_GOAL * 100).toFixed(1) + "%";
+    const t0 = performance.now(), dur = 1300;
+    (function step(t){
+      const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      hours.textContent = minsTxt(Math.round(mins * e));
+      if (k < 1) skyCount = requestAnimationFrame(step);
+    })(t0);
+  }, 2600);
+}
+document.getElementById("wBtn").addEventListener("click", e => { e.stopPropagation(); closeScene(); });
+skyfx.addEventListener("click", () => {
+  // the sunrise is meant to be watched: taps only close it once the card is up
+  if (skyfx.classList.contains("to-night") || performance.now() - skyStarted > 2600) closeScene();
+});
 /* ---- cardio & sports: its own page, like an exercise's progress page ---- */
 document.querySelectorAll(".badge").forEach(b => b.innerHTML = sportSvg(b.dataset.ic));
 syncPicks();
