@@ -583,6 +583,67 @@ main{position:relative;z-index:0;isolation:isolate}
 @keyframes barUp{from{transform:scaleY(0)}to{transform:none}}
 .sstat{animation:fadeUp .4s ease backwards}
 @media (prefers-reduced-motion:reduce){.sbig-ic i,.sbig-night,.skyfx{transition:none}#sChart rect.g,.sbig .swap{animation:none}}
+/* ===== calories ===== */
+.kcal{display:inline-flex;align-items:center;gap:4px;font-weight:600;color:var(--run);font-size:.85rem;white-space:nowrap}
+.kcal svg{width:13px;height:13px;flex:none}
+.total .kcal{margin-left:auto;font-size:.95rem;align-self:center}
+.sk{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-top:4px}
+.gymtime{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:16px;padding:8px 8px 8px 14px;margin-bottom:8px;animation:fadeUp .25s ease}
+.gt-ic{display:grid;place-items:center;color:var(--muted)}
+.gt-ic svg{width:22px;height:22px}
+.gt-txt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.gt-txt b{font-weight:600;font-size:.95rem}
+.gt-step{display:flex;align-items:center;gap:2px;flex:none}
+.gt-step button{width:38px;height:38px;border-radius:11px;border:0;background:var(--surface);color:var(--ink);font:inherit;font-size:1.35rem;cursor:pointer}
+.gt-step button:active{transform:scale(.92)}
+#gtVal{display:inline-block;font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:1.45rem;min-width:2.4ch;text-align:center;font-variant-numeric:tabular-nums}
+.gt-step small{color:var(--muted);margin:0 6px 0 1px;font-size:.8rem}
+.cweekk{margin:12px 0 0;text-align:center}
+/* ===== weights: edit + library ===== */
+.whead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 18px}
+.whead h1{margin:0}
+.wedit{display:inline-flex;align-items:center;gap:6px;font:inherit;font-weight:600;font-size:.92rem;border:0;border-radius:22px;padding:9px 15px;background:var(--surface);color:var(--ink);cursor:pointer;transition:background-color .2s,color .2s,transform .2s cubic-bezier(.25,1,.5,1)}
+.wedit:active{transform:scale(.95)}
+.wedit.on{background:var(--ink);color:var(--bg)}
+.wedit svg{width:16px;height:16px}
+.erow .tile.sm{width:36px;height:36px;border-radius:10px}
+.erow .tile.sm svg{width:28px;height:28px}
+.erow{display:flex;align-items:center;gap:6px;background:var(--surface);border-radius:16px;padding:8px;margin-bottom:8px;animation:fadeUp .25s ease backwards;transition:opacity .2s,transform .2s}
+.erow.gone{opacity:0;transform:translateX(30px)}
+.tile.sm{width:42px;height:42px;border-radius:12px;flex:none}
+.tile.sm svg{width:32px;height:32px}
+.ename{flex:1;min-width:0;font:inherit;font-weight:600;color:var(--ink);background:var(--bg);border:1.5px solid transparent;border-radius:11px;padding:9px 10px}
+.ename:focus{border-color:var(--c);outline:0}
+.eb{flex:none;width:32px;height:32px;border-radius:50%;border:0;background:var(--bg);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
+.eb svg{width:16px;height:16px}
+.eb:disabled{opacity:.22;cursor:default}
+.eb.rm{color:var(--down)}
+.eb:active:not(:disabled){transform:scale(.88)}
+.eadd{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font:inherit;font-weight:600;color:var(--c);background:transparent;border:1.5px dashed color-mix(in srgb,var(--c) 60%,transparent);border-radius:16px;padding:12px;cursor:pointer;margin-bottom:6px}
+.eadd svg{width:18px;height:18px}
+.eadd:active{transform:scale(.98)}
+.wundo{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border-radius:14px;padding:8px 8px 8px 14px;margin-bottom:12px;font-size:.92rem;animation:fadeUp .25s ease}
+.wundo .undo{color:var(--ink)}
+.gempty{color:var(--muted);font-size:.9rem;margin:-4px 0 10px}
+#exPicker:not([hidden]){animation:fadeUp .3s ease backwards}
+#pkSearch{margin:6px 0 12px;-webkit-appearance:none;appearance:none}
+#pkList{margin:14px 0 8px}
+.pkrow{display:flex;align-items:center;gap:12px;width:100%;font:inherit;color:var(--ink);text-align:left;background:var(--surface);border:1.5px solid transparent;border-radius:16px;padding:9px 10px;margin-bottom:8px;cursor:pointer;transition:border-color .2s}
+.pkrow:active{transform:scale(.985)}
+.pk-t{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.pk-t b{font-weight:600}
+.pk-t small{color:var(--muted);font-size:.82rem}
+.pk-add{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--bg);color:var(--ink);transition:background-color .2s,color .2s}
+.pk-add svg{width:16px;height:16px}
+.pkrow.in{border-color:var(--c)}
+.pkrow.in .pk-add{background:var(--c);color:#fff}
+.pkrow.tick .pk-add{animation:popIn .3s cubic-bezier(.25,1,.5,1)}
+.pknew{margin-top:18px;border-top:4px solid var(--c)}
+.eqs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0 14px}
+.eq{font:inherit;font-size:.72rem;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 2px;border-radius:14px;border:1.5px solid transparent;background:var(--bg);color:var(--ink);cursor:pointer;transition:border-color .2s,background-color .2s}
+.eq svg{width:28px;height:28px}
+.eq[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--bg))}
+.cprev{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
 </style>
 </head>
 <body>
@@ -616,6 +677,11 @@ main{position:relative;z-index:0;isolation:isolate}
         <span class="morebody"><b id="moreLabel">Cardio &amp; sports</b><small id="moreSub">Tap to add to this session</small></span>
         <span class="plusc" id="morePlus" aria-hidden="true"></span>
       </button>
+      <div class="gymtime" id="gymTime" hidden>
+        <span class="gt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg></span>
+        <span class="gt-txt"><b>Workout time</b><small id="gtK"></small></span>
+        <span class="gt-step"><button data-gt="-1" aria-label="5 minutes less">−</button><span id="gtVal">60</span><small>min</small><button data-gt="1" aria-label="5 minutes more">+</button></span>
+      </div>
       <p class="hint">Pick everything you trained. Add core or a sport if you did it too.</p>
       <button class="btn" id="save" disabled>Log session</button>
       <div class="toast" id="toast" role="status"></div>
@@ -631,7 +697,7 @@ main{position:relative;z-index:0;isolation:isolate}
         <div class="period" id="period"></div>
         <button id="next" aria-label="Next">›</button>
       </div>
-      <div class="total"><span class="big" id="count">0</span><span id="countLabel">sessions</span></div>
+      <div class="total"><span class="big" id="count">0</span><span id="countLabel">sessions</span><span id="kcalTotal"></span></div>
       <div id="chart"></div>
       <div class="split" id="split"></div>
     </section>
@@ -659,9 +725,14 @@ main{position:relative;z-index:0;isolation:isolate}
 
   <!-- WEIGHTS -->
   <div id="tab-weights" hidden>
-    <h1>Weights</h1>
+    <div class="whead">
+      <h1>Weights</h1>
+      <button class="wedit" id="wEdit" aria-label="Edit exercises"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg><span>Edit</span></button>
+    </div>
+    <div class="wundo" id="wUndo" hidden></div>
     <div id="exlist"></div>
   </div>
+  <div id="exPicker" hidden></div>
 
   <!-- BODY WEIGHT -->
   <div id="tab-body" hidden>
@@ -788,6 +859,7 @@ main{position:relative;z-index:0;isolation:isolate}
     <section aria-label="This week">
       <h2>This week</h2>
       <div class="bwtoday" id="cardioWeek"></div>
+      <p class="cweekk" id="cardioWeekK"></p>
     </section>
     <div id="cardioList"></div>
   </div>
@@ -977,6 +1049,12 @@ function showTab(t){
   document.getElementById("tab-sleep").hidden = t !== "sleep";
   document.getElementById("cardioDetail").hidden = true; currentCardio = null;
   document.getElementById("detail").hidden = true;
+  document.getElementById("exPicker").hidden = true; pickerG = null;
+  if (t !== "weights" && wEditing){
+    wEditing = false;
+    const wb = document.getElementById("wEdit"); wb.classList.remove("on"); wb.querySelector("span").textContent = "Edit";
+    document.getElementById("wUndo").hidden = true;
+  }
   if (t === "weights") renderExercises();
   if (t === "body") renderBody();
   if (t === "cardio") renderCardio();
@@ -1016,6 +1094,7 @@ document.querySelectorAll(".type, .act").forEach(b => b.addEventListener("click"
   syncPicks();
 }));
 function syncPicks(){
+  updateGymTime();
   document.querySelectorAll(".act").forEach(b => b.setAttribute("aria-pressed", picked.includes(b.dataset.t)));
   const ex = EXTRA.filter(t => picked.includes(t));
   const mb = document.getElementById("moreBtn");
@@ -1038,7 +1117,7 @@ dateInput.addEventListener("change", syncPicks);
 document.getElementById("save").addEventListener("click", () => {
   const types = [...picked].sort((a,b) => ORDER.indexOf(a) - ORDER.indexOf(b));
   const id = Date.now().toString(36);
-  entries.push({ id, date: dateInput.value, types });
+  entries.push(types.some(t => isLift(t) || t === "core") ? { id, date: dateInput.value, types, min: gymMin } : { id, date: dateInput.value, types });
   const made = addPendingCardio(dateInput.value, types);
   saveAll();
   const toast = document.getElementById("toast");
@@ -1086,6 +1165,12 @@ function render(){
   document.getElementById("next").disabled = e > new Date();
   document.getElementById("count").textContent = list.length;
   document.getElementById("countLabel").textContent = list.length === 1 ? "session" : "sessions";
+  {
+    const cardioK = (lifts.__cardio || []).filter(c => { const d = parse(c.date); return d >= s && d < e; }).reduce((t, c) => t + cardioKcal(c), 0);
+    const tot = list.reduce((t, x) => t + gymKcal(x), 0) + cardioK;
+    document.getElementById("kcalTotal").innerHTML = tot ? kcalChip(tot) : "";
+  }
+  updateGymTime();
 
   let html = "";
   if (view === "week"){
@@ -1116,9 +1201,13 @@ function render(){
 
   const ul = document.getElementById("list");
   if (!list.length){ ul.innerHTML = `<p class="empty">Nothing logged in this ${view} yet.</p>`; return; }
-  ul.innerHTML = [...list].sort((a,b) => b.date.localeCompare(a.date)).map(x =>
-    `<li><div><div>${fmt(parse(x.date))}</div><div class="tags">${x.types.map(t => `<span class="tag ${t}" style="--c:var(--${t})">${TYPES[t]}</span>`).join("")}</div></div>
-     <button class="del" data-id="${x.id}">Delete</button></li>`).join("");
+  const kSeen = new Set();
+  ul.innerHTML = [...list].sort((a,b) => b.date.localeCompare(a.date)).map(x => {
+    const gm = gymMinutes(x), first = !kSeen.has(x.date); kSeen.add(x.date);
+    const k = gymKcal(x) + (first ? dayCardioKcal(x.date) : 0);
+    const meta = (gm || k) ? `<div class="exsub sk">${gm ? `<span>${gm} min</span>` : ""}${k ? kcalChip(k) : ""}</div>` : "";
+    return `<li><div><div>${fmt(parse(x.date))}</div><div class="tags">${x.types.map(t => `<span class="tag ${t}" style="--c:var(--${t})">${TYPES[t]}</span>`).join("")}</div>${meta}</div>
+     <button class="del" data-id="${x.id}">Delete</button></li>`; }).join("");
   ul.querySelectorAll(".del").forEach(b => b.addEventListener("click", () => armDelete(b, () => {
     const gone = entries.find(x => x.id === b.dataset.id);
     entries = entries.filter(x => x.id !== b.dataset.id);
@@ -1156,34 +1245,228 @@ const ART = {
   legcurl:  EQ("M6 45H48M12 45v10M42 45v10") + HEAD(9,37) + P("14,40","35,40","47,40","42,23") + PAD(41,19),
   abduct:   EQ("M20 41H44M32 41v14M9 34v14M55 34v14") + HEAD(32,11) + P("32,16","32,39") + P("15,55","15,43","32,39","49,43","49,55") + P("32,21","24,33") + P("32,21","40,33"),
 };
-const art = id => `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ART[id]}</svg>`;
+const art = id => `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ART[id] || (GEAR[(exById(id) || {}).eq] || GEAR.db).ic}</svg>`;
 
 /* ================= weights ================= */
-const EX = [
-  {id:"flat",     g:"push", name:"Flat dumbbell press",       kind:"Dumbbells",        step:1},
-  {id:"incline",  g:"push", name:"Incline dumbbell press",    kind:"Dumbbells",        step:1},
-  {id:"pullover", g:"push", name:"Dumbbell pullover",         kind:"One dumbbell",     step:1},
-  {id:"shoulder", g:"push", name:"Shoulder press",            kind:"Dumbbells",        step:1},
-  {id:"lateral",  g:"push", name:"Lateral raises",            kind:"Dumbbells",        step:1},
-  {id:"reardelt", g:"push", name:"Rear delt fly",             kind:"Dumbbells",        step:1},
-  {id:"pushdown", g:"push", name:"Tricep pushdown",           kind:"Cable with rope",  step:2.5},
-  {id:"overhead", g:"push", name:"Overhead tricep extension", kind:"Cable with rope",  step:2.5},
-  {id:"latpull",  g:"pull", name:"Lat pulldown",              kind:"Cable with bar",   step:2.5},
-  {id:"row",      g:"pull", name:"Seated row",                kind:"Cable",            step:2.5},
-  {id:"roman",    g:"pull", name:"Back extension",            kind:"Roman chair",      step:2.5},
-  {id:"curl",     g:"pull", name:"Bicep curls",               kind:"Dumbbells",        step:1},
-  {id:"cablecurl",g:"pull", name:"Cable bar curl",            kind:"Cable with short bar", step:2.5},
-  {id:"legext",   g:"legs", name:"Leg extension",             kind:"Machine",          step:2.5},
-  {id:"calf",     g:"legs", name:"Calf raises",               kind:"On the leg press", step:5},
-  {id:"legcurl",  g:"legs", name:"Leg curl",                  kind:"Machine",          step:2.5},
-  {id:"abduct",   g:"legs", name:"Hip abduction",             kind:"Machine",          step:2.5},
-];
 const LKEY = "gymlog.lifts.v1";
 let lifts = store(LKEY, {});          // { exerciseId: [{id, date, kg}] }
 const pending = {};                   // unsaved stepper values
 const hist = id => (lifts[id] || []).slice().sort((a,b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
 const last = id => { const h = hist(id); return h.length ? h[h.length-1] : null; };
-const exById = id => EX.find(e => e.id === id);
+/* ================= exercise library + editing ================= */
+const GEAR = {
+  db:      { label: "Dumbbells",  step: 1,   ic: `<path d="M20 32h24"/><rect x="11" y="21" width="9" height="22" rx="2.5"/><rect x="44" y="21" width="9" height="22" rx="2.5"/><path d="M6 27v10M58 27v10"/>` },
+  bb:      { label: "Barbell",    step: 2.5, ic: `<path d="M4 32h56"/><rect x="11" y="16" width="6" height="32" rx="2"/><rect x="18" y="21" width="5" height="22" rx="2"/><rect x="47" y="16" width="6" height="32" rx="2"/><rect x="41" y="21" width="5" height="22" rx="2"/>` },
+  cable:   { label: "Cable",      step: 2.5, ic: `<path d="M12 6v52" opacity=".35"/><circle cx="32" cy="12" r="6"/><path d="M32 18v22"/><path d="M20 42h24" stroke-width="4.5"/><path d="M26 42v8M38 42v8" opacity=".5"/>` },
+  machine: { label: "Machine",    step: 2.5, ic: `<path d="M32 4v8"/><rect x="19" y="12" width="26" height="44" rx="4"/><path d="M19 23h26M19 34h26M19 45h26" opacity=".45"/><circle cx="32" cy="28.5" r="2.4" fill="currentColor" stroke="none"/>` },
+  bw:      { label: "Bodyweight", step: 2.5, ic: `<path d="M8 8h48" opacity=".45"/><path d="M20 8v6M44 8v6"/><circle cx="32" cy="22" r="5" fill="currentColor" stroke="none"/><path d="M20 14l12 14 12-14M32 28v14M26 58l6-16 6 16"/>` },
+  kb:      { label: "Kettlebell", step: 2,   ic: `<path d="M23 24v-4a9 9 0 0 1 18 0v4"/><path d="M20 26h24"/><path d="M19 30c-7 8-4 24 13 24s20-16 13-24"/>` },
+  plate:   { label: "Plate",      step: 2.5, ic: `<circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="6"/><path d="M32 10v8M32 46v8" opacity=".4"/>` },
+};
+// [id, group, name, equipment, kind label (optional), step (optional)]
+const LIB_RAW = [
+  // your original list (custom drawings)
+  ["flat","push","Flat dumbbell press","db"],["incline","push","Incline dumbbell press","db"],["pullover","push","Dumbbell pullover","db","One dumbbell"],
+  ["shoulder","push","Shoulder press","db"],["lateral","push","Lateral raises","db"],["reardelt","push","Rear delt fly","db"],
+  ["pushdown","push","Tricep pushdown","cable","Cable with rope"],["overhead","push","Overhead tricep extension","cable","Cable with rope"],
+  ["latpull","pull","Lat pulldown","cable","Cable with bar"],["row","pull","Seated row","cable"],["roman","pull","Back extension","bw","Roman chair"],
+  ["curl","pull","Bicep curls","db"],["cablecurl","pull","Cable bar curl","cable","Cable with short bar"],
+  ["legext","legs","Leg extension","machine"],["calf","legs","Calf raises","machine","On the leg press",5],["legcurl","legs","Leg curl","machine"],["abduct","legs","Hip abduction","machine"],
+  // push
+  ["bbbench","push","Barbell bench press","bb"],["bbincline","push","Incline barbell press","bb"],["decline","push","Decline bench press","bb"],
+  ["chestpress","push","Chest press machine","machine"],["pecdeck","push","Pec deck fly","machine"],["crossover","push","Cable crossover","cable",null,1.25],
+  ["dbfly","push","Dumbbell fly","db"],["dips","push","Dips","bw","Added weight"],["pushup","push","Weighted push-ups","bw","Added weight"],
+  ["ohp","push","Overhead barbell press","bb"],["arnold","push","Arnold press","db"],["mshoulder","push","Shoulder press machine","machine"],
+  ["frontraise","push","Front raises","db"],["cablelat","push","Cable lateral raise","cable",null,1.25],["skull","push","Skull crushers","bb","EZ bar"],
+  ["cgbench","push","Close-grip bench press","bb"],["kickback","push","Tricep kickback","db"],["onearmpush","push","Single-arm pushdown","cable",null,1.25],
+  ["dipmachine","push","Tricep dip machine","machine"],["landmine","push","Landmine press","bb"],
+  // pull
+  ["pullup","pull","Pull-ups","bw","Added weight"],["chinup","pull","Chin-ups","bw","Added weight"],["bbrow","pull","Barbell row","bb"],
+  ["dbrow","pull","One-arm dumbbell row","db"],["tbar","pull","T-bar row","bb"],["mrow","pull","Chest-supported row machine","machine"],
+  ["salat","pull","Single-arm lat pulldown","cable",null,1.25],["straightarm","pull","Straight-arm pulldown","cable"],["facepull","pull","Face pulls","cable"],
+  ["revpec","pull","Reverse pec deck","machine"],["deadlift","pull","Deadlift","bb",null,5],["rackpull","pull","Rack pull","bb",null,5],
+  ["shrug","pull","Dumbbell shrugs","db",null,2],["bbcurl","pull","Barbell curl","bb"],["ezcurl","pull","EZ-bar curl","bb","EZ bar"],
+  ["hammer","pull","Hammer curls","db"],["inclinecurl","pull","Incline dumbbell curl","db"],["preacher","pull","Preacher curl","machine"],
+  ["conc","pull","Concentration curl","db"],["ropehammer","pull","Rope hammer curl","cable"],["wristcurl","pull","Wrist curls","db"],
+  // legs
+  ["squat","legs","Back squat","bb"],["frontsquat","legs","Front squat","bb"],["legpress","legs","Leg press","machine",null,5],
+  ["hack","legs","Hack squat","machine",null,5],["rdl","legs","Romanian deadlift","bb"],["bulgarian","legs","Bulgarian split squat","db"],
+  ["lunge","legs","Walking lunges","db"],["goblet","legs","Goblet squat","kb"],["hipthrust","legs","Hip thrust","bb",null,5],
+  ["adduct","legs","Hip adduction","machine"],["seatcalf","legs","Seated calf raise","machine"],["standcalf","legs","Standing calf raise","machine",null,5],
+  ["stepup","legs","Step-ups","db"],["goodmorning","legs","Good mornings","bb"],["smithsquat","legs","Smith machine squat","machine"],
+  ["glutekick","legs","Cable glute kickback","cable",null,1.25],["kbswing","legs","Kettlebell swings","kb"],
+  // core
+  ["cablecrunch","core","Cable crunch","cable"],["abmachine","core","Ab crunch machine","machine"],["legraise","core","Hanging leg raise","bw","Added weight"],
+  ["declinesit","core","Weighted decline sit-up","plate"],["russian","core","Russian twist","plate",null,1.25],["pallof","core","Pallof press","cable",null,1.25],
+  ["woodchop","core","Cable woodchopper","cable",null,1.25],["sidebend","core","Side bends","db"],["plank","core","Weighted plank","plate",null,5],
+];
+const LIB = LIB_RAW.map(([id, g, name, eq, kind, step]) => ({ id, g, name, eq, kind: kind || GEAR[eq].label, step: step || GEAR[eq].step }));
+const DEFAULT_LIST = ["flat","incline","pullover","shoulder","lateral","reardelt","pushdown","overhead","latpull","row","roman","curl","cablecurl","legext","calf","legcurl","abduct"];
+const GROUPS = [["push","Push"],["pull","Pull"],["legs","Legs"],["core","Core"]];
+function exCfg(){
+  const c = (lifts.__exlist || []).find(x => x.id === "cfg");
+  return c || { id: "cfg", list: DEFAULT_LIST.slice(), custom: [], names: {} };
+}
+function saveCfg(c){ c.t = Date.now(); lifts.__exlist = [c]; saveAll(); }
+function exAll(){ return [...LIB, ...(exCfg().custom || [])]; }
+function exById(id){
+  const e = exAll().find(x => x.id === id); if (!e) return null;
+  const n = (exCfg().names || {})[id];
+  return n ? { ...e, name: n } : e;
+}
+function activeEx(){ return exCfg().list.map(exById).filter(Boolean); }
+
+/* ---- edit mode ---- */
+let wEditing = false, wRemoved = null, pickerG = null, pickerEq = "db";
+const IC_UP = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>`;
+const IC_DOWN = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
+const IC_X = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
+const IC_PLUS = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
+const IC_CHECK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
+const esc = t => String(t).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+
+function renderEditList(){
+  const list = activeEx();
+  document.getElementById("exlist").innerHTML = GROUPS.map(([g, label]) => {
+    const items = list.filter(e => e.g === g);
+    return `<div class="group"><span class="dot" style="--c:var(--${g})"></span><h2>${label}</h2><span>${items.length}</span></div>
+      ${items.map((e, i) => `<div class="erow" data-id="${e.id}" style="--c:var(--${g})">
+        <span class="tile sm">${art(e.id)}</span>
+        <input class="ename" value="${esc(e.name)}" aria-label="Exercise name" data-id="${e.id}" maxlength="40">
+        <button class="eb" data-ed="up" aria-label="Move up" ${i === 0 ? "disabled" : ""}>${IC_UP}</button>
+        <button class="eb" data-ed="down" aria-label="Move down" ${i === items.length - 1 ? "disabled" : ""}>${IC_DOWN}</button>
+        <button class="eb rm" data-ed="rm" aria-label="Remove ${esc(e.name)}">${IC_X}</button>
+      </div>`).join("")}
+      <button class="eadd" data-ed="add" data-g="${g}" style="--c:var(--${g})">${IC_PLUS} Add ${label.toLowerCase()} exercise</button>`;
+  }).join("") + `<p class="hint" style="margin-top:18px;text-align:center">Removing an exercise only hides it. Its history stays, and comes back if you add it again.</p>
+    <div style="text-align:center"><button class="undo" id="wReset">Reset to the default list</button></div>`;
+}
+document.getElementById("wEdit").addEventListener("click", () => {
+  wEditing = !wEditing; wRemoved = null;
+  const b = document.getElementById("wEdit");
+  b.classList.toggle("on", wEditing);
+  b.querySelector("span").textContent = wEditing ? "Done" : "Edit";
+  document.getElementById("wUndo").hidden = true;
+  renderExercises();
+});
+document.getElementById("exlist").addEventListener("click", ev => {
+  if (ev.target.id === "wReset"){
+    const b = ev.target;
+    if (!b.classList.contains("sure")){
+      b.classList.add("sure"); b.textContent = "Tap again to reset";
+      setTimeout(() => { if (b.isConnected){ b.classList.remove("sure"); b.textContent = "Reset to the default list"; } }, 3000);
+      return;
+    }
+    const c = exCfg(); c.list = DEFAULT_LIST.slice(); c.names = {}; saveCfg(c); renderExercises(); return;
+  }
+  const b = ev.target.closest("[data-ed]"); if (!b) return;
+  if (b.dataset.ed === "add") return openPicker(b.dataset.g);
+  const row = b.closest(".erow"), id = row.dataset.id, c = exCfg(), g = exById(id).g;
+  if (b.dataset.ed === "rm"){
+    const idx = c.list.indexOf(id);
+    c.list = c.list.filter(x => x !== id);
+    wRemoved = { id, idx };
+    saveCfg(c);
+    const u = document.getElementById("wUndo");
+    u.innerHTML = `<span>Removed ${esc(exById(id).name)}</span><button class="undo" id="wUndoBtn">Undo</button>`;
+    u.hidden = false;
+    u.querySelector("#wUndoBtn").addEventListener("click", () => {
+      const c2 = exCfg();
+      if (wRemoved && !c2.list.includes(wRemoved.id)) c2.list.splice(Math.min(wRemoved.idx, c2.list.length), 0, wRemoved.id);
+      wRemoved = null; saveCfg(c2); u.hidden = true; renderExercises();
+    });
+    row.classList.add("gone");
+    setTimeout(renderExercises, 220);
+    return;
+  }
+  // move within its group
+  const same = c.list.filter(x => exById(x) && exById(x).g === g);
+  const pos = same.indexOf(id), other = same[pos + (b.dataset.ed === "up" ? -1 : 1)];
+  if (!other) return;
+  const a = c.list.indexOf(id), o = c.list.indexOf(other);
+  [c.list[a], c.list[o]] = [c.list[o], c.list[a]];
+  saveCfg(c);
+  renderExercises();
+});
+document.getElementById("exlist").addEventListener("change", ev => {
+  if (!ev.target.classList.contains("ename")) return;
+  const id = ev.target.dataset.id, c = exCfg(), v = ev.target.value.trim();
+  const base = exAll().find(x => x.id === id);
+  c.names = c.names || {};
+  if (!v || v === base.name){ delete c.names[id]; ev.target.value = base.name; } else c.names[id] = v;
+  saveCfg(c);
+});
+
+/* ---- add-exercise page ---- */
+function openPicker(g){
+  pickerG = g;
+  document.getElementById("tab-weights").hidden = true;
+  const el = document.getElementById("exPicker");
+  el.innerHTML = `<button class="back" id="pkBack">‹ Weights</button>
+    <h1 style="margin-bottom:6px">Add exercises</h1>
+    <p class="hint">Tap to add or remove. Your list updates right away.</p>
+    <input class="inp" id="pkSearch" type="search" placeholder="Search all exercises" autocomplete="off">
+    <div class="seg four" role="tablist" id="pkGroup">${GROUPS.map(([k, l]) => `<button role="tab" data-g="${k}" aria-selected="${k === g}">${l}</button>`).join("")}</div>
+    <div id="pkList"></div>
+    <section class="pknew" id="pkNew">
+      <h2>Create your own</h2>
+      <input class="inp" id="pkName" placeholder="Exercise name" maxlength="40" autocomplete="off">
+      <div class="eqs" id="pkEqs">${Object.entries(GEAR).map(([k, q]) => `<button class="eq" data-eq="${k}" aria-pressed="${k === pickerEq}"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">${q.ic}</svg>${q.label}</button>`).join("")}</div>
+      <button class="btn" id="pkCreate">Create and add</button>
+      <div class="toast" id="pkToast" role="status"></div>
+    </section>`;
+  el.hidden = false;
+  window.scrollTo(0, 0);
+  el.querySelector("#pkBack").addEventListener("click", () => { pickerG = null; showTab("weights"); });
+  el.querySelector("#pkSearch").addEventListener("input", renderPicker);
+  el.querySelectorAll("#pkGroup button").forEach(b => b.addEventListener("click", () => {
+    pickerG = b.dataset.g;
+    el.querySelectorAll("#pkGroup button").forEach(x => x.setAttribute("aria-selected", x === b));
+    renderPicker();
+  }));
+  el.querySelectorAll(".eq").forEach(b => b.addEventListener("click", () => {
+    pickerEq = b.dataset.eq;
+    el.querySelectorAll(".eq").forEach(x => x.setAttribute("aria-pressed", x === b));
+  }));
+  el.querySelector("#pkCreate").addEventListener("click", () => {
+    const name = el.querySelector("#pkName").value.trim(), t = el.querySelector("#pkToast");
+    if (!name){ t.textContent = "Give it a name first."; return; }
+    const c = exCfg(), id = "c" + Date.now().toString(36);
+    c.custom = c.custom || [];
+    c.custom.push({ id, g: pickerG, name, eq: pickerEq, kind: GEAR[pickerEq].label, step: GEAR[pickerEq].step });
+    c.list.push(id);
+    saveCfg(c);
+    el.querySelector("#pkName").value = "";
+    t.textContent = `Added ${name} to ${GROUPS.find(x => x[0] === pickerG)[1]}.`;
+    renderPicker();
+  });
+  renderPicker();
+}
+function renderPicker(){
+  const el = document.getElementById("exPicker"); if (el.hidden || !pickerG) return;
+  const q = (el.querySelector("#pkSearch").value || "").trim().toLowerCase();
+  const inList = new Set(exCfg().list);
+  const names = exCfg().names || {};
+  let items = exAll().map(e => names[e.id] ? { ...e, name: names[e.id] } : e);
+  items = q ? items.filter(e => e.name.toLowerCase().includes(q) || e.kind.toLowerCase().includes(q)) : items.filter(e => e.g === pickerG);
+  items.sort((a, b) => (inList.has(a.id) - inList.has(b.id)) || a.name.localeCompare(b.name));   // new options first
+  el.querySelector("#pkNew").style.setProperty("--c", `var(--${pickerG})`);
+  el.querySelector("#pkList").innerHTML = items.length ? items.map(e => `<button class="pkrow${inList.has(e.id) ? " in" : ""}" data-id="${e.id}" style="--c:var(--${e.g})">
+      <span class="tile sm">${art(e.id)}</span>
+      <span class="pk-t"><b>${esc(e.name)}</b><small>${esc(e.kind)}${q ? " · " + GROUPS.find(x => x[0] === e.g)[1] : ""}</small></span>
+      <span class="pk-add">${inList.has(e.id) ? IC_CHECK : IC_PLUS}</span></button>`).join("")
+    : `<p class="empty" style="margin:4px 0 16px">Nothing matches. Create it below.</p>`;
+  el.querySelectorAll(".pkrow").forEach(b => b.addEventListener("click", () => {
+    const c = exCfg(), id = b.dataset.id;
+    c.list = c.list.includes(id) ? c.list.filter(x => x !== id) : [...c.list, id];
+    saveCfg(c);
+    const on = c.list.includes(id);
+    b.classList.toggle("in", on);
+    b.querySelector(".pk-add").innerHTML = on ? IC_CHECK : IC_PLUS;
+    b.classList.remove("tick"); void b.offsetWidth; b.classList.add("tick");
+  }));
+}
+
 
 function subText(id){
   const l = last(id);
@@ -1209,11 +1492,14 @@ function card(e){
   </div>`;
 }
 function renderExercises(){
-  const groups = [["push","Push"],["pull","Pull"],["legs","Legs"]];
-  document.getElementById("exlist").innerHTML = groups.map(([g,label]) => {
-    const list = EX.filter(e => e.g === g);
-    return `<div class="group"><span class="dot" style="--c:var(--${g})"></span><h2>${label}</h2><span>${list.length} exercises</span></div>` + list.map(card).join("");
+  if (wEditing) return renderEditList();
+  const all = activeEx();
+  const html = GROUPS.map(([g,label]) => {
+    const list = all.filter(e => e.g === g);
+    if (!list.length) return "";
+    return `<div class="group"><span class="dot" style="--c:var(--${g})"></span><h2>${label}</h2><span>${list.length} ${list.length === 1 ? "exercise" : "exercises"}</span></div>` + list.map(card).join("");
   }).join("");
+  document.getElementById("exlist").innerHTML = html || `<section><p class="empty">Your list is empty. Tap Edit to add exercises.</p></section>`;
 }
 function refreshSave(row, id){
   const l = last(id), btn = row.querySelector(".save");
@@ -2049,6 +2335,8 @@ function metricText(x){
 function renderCardio(){
   const s0 = weekStart(new Date()), wk = cardioAll().filter(x => !x.pending).filter(x => { const d = parse(x.date); return d >= s0 && d < addDays(s0, 7); });
   const wkSec = wk.reduce((a, x) => a + x.sec, 0), wkKm = wk.reduce((a, x) => a + (CSPORT[x.sport].dist ? x.km : 0), 0);
+  const wkK = wk.reduce((a, x) => a + cardioKcal(x), 0);
+  document.getElementById("cardioWeekK").innerHTML = wkK ? `${kcalChip(wkK)} <span class="exsub">burned this week</span>` : "";
   document.getElementById("cardioWeek").innerHTML = `
     <div><div class="cond">${wk.length}</div><p>${wk.length === 1 ? "workout" : "workouts"}</p></div>
     <div><div class="cond">${wkSec ? durWords(wkSec) : "0 min"}</div><p>total time</p></div>
@@ -2135,6 +2423,7 @@ function openCardio(k, editId){
         <div><div class="cond">${month.length}</div><p>${month.length === 1 ? sp.one : sp.many}</p></div>
         <div><div class="cond">${mSec ? durWords(mSec) : "0 min"}</div><p>total time</p></div>
         ${sp.dist ? `<div><div class="cond">${sp.dist === "m" ? Math.round(mKm * 1000) + " m" : Math.round(mKm * 10) / 10 + " km"}</div><p>distance</p></div>` : ""}
+        ${month.length ? `<div><div class="cond" style="color:var(--run)">${fmtK(month.reduce((a, x) => a + cardioKcal(x), 0))}</div><p>kcal burned</p></div>` : ""}
       </div>
       <h2 style="margin-top:14px">Bests</h2>
       <div class="stats cstats">${best}</div>
@@ -2144,7 +2433,7 @@ function openCardio(k, editId){
       <h2>All ${sp.many}</h2>
       <ul class="clist">${list.slice().reverse().map(x => `<li>
         <div class="cedit" data-edit="${x.id}"><b>${[distText(x), dur(x.sec)].filter(Boolean).join(" · ")}</b>
-        <div class="exsub">${fmt(parse(x.date))}${metricText(x) ? " · " + metricText(x) : ""}</div></div>
+        <div class="exsub sk"><span>${fmt(parse(x.date))}${metricText(x) ? " · " + metricText(x) : ""}</span>${cardioKcal(x) ? kcalChip(cardioKcal(x)) : ""}</div></div>
         <button class="del" data-cid="${x.id}">Delete</button></li>`).join("")}</ul>
     </section>` : `<section><p class="empty">Your ${sp.many} will show up here with your times${sp.dist ? ", distances and speed" : ""}.</p></section>`}`;
 
@@ -2156,7 +2445,8 @@ function openCardio(k, editId){
     const dEl = el.querySelector("#cDist"), dv = dEl ? parseFloat(dEl.value) || 0 : 0;
     const km = sp.dist === "m" ? dv / 1000 : dv;
     const x = { sport: k, sec, km, rounds: +(el.querySelector("#cR") || {}).value || 0 };
-    el.querySelector("#cPrev").textContent = sec > 0 && (!sp.dist || km > 0) ? (metricText(x) || durWords(sec)) : "";
+    const ok = sec > 0 && (!sp.dist || km > 0), kc = ok ? cardioKcal({ ...x, date: el.querySelector("#cDate").value }) : 0;
+    el.querySelector("#cPrev").innerHTML = ok ? `<span>${metricText(x) || durWords(sec)}</span>${kc ? kcalChip(kc) : ""}` : "";
     return x;
   };
   el.querySelectorAll(".tbox input, #cDist, #cR").forEach(i => i.addEventListener("input", upd));
@@ -2185,7 +2475,7 @@ function openCardio(k, editId){
     openCardio(k);
     cheer(k);
     const done = document.querySelector("#cardioDetail #cToast");
-    if (done) done.textContent = `Logged ${[distText(entry), dur(entry.sec), metricText(entry)].filter(Boolean).join(" · ")}.`;
+    if (done) done.textContent = `Logged ${[distText(entry), dur(entry.sec), metricText(entry), cardioKcal(entry) ? "≈ " + fmtK(cardioKcal(entry)) + " kcal" : ""].filter(Boolean).join(" · ")}.`;
   });
   el.querySelectorAll("[data-cid]").forEach(b => b.addEventListener("click", () => armDelete(b, () => {
     lifts.__cardio = (lifts.__cardio || []).filter(x => x.id !== b.dataset.cid); saveAll(); openCardio(k);
@@ -2195,6 +2485,59 @@ function openCardio(k, editId){
   el.hidden = false;
   if (!editing) window.scrollTo(0, 0);
 }
+
+/* ================= calories ================= */
+// Estimates from your latest body weight and how long/hard you trained (standard MET values).
+function bodyKgOn(date){
+  const days = Object.keys(bw || {}).filter(d => bw[d] && (bw[d].m || bw[d].n)).sort();
+  if (!days.length) return 70;
+  const pick = days.filter(d => d <= date).pop() || days[0];
+  return (bw[pick].m || bw[pick].n).kg;
+}
+function cardioKcal(x){
+  if (!x || x.pending || !(x.sec > 0)) return 0;
+  const kgB = bodyKgOn(x.date || iso(new Date())), h = x.sec / 3600;
+  let kc;
+  if (x.sport === "run" && x.km > 0) kc = kgB * x.km * 1.036;              // ~1 kcal per kg per km
+  else {
+    let met = { run: 9.8, bike: 7.5, swim: 7, tennis: 7.3, box: 7.8 }[x.sport] || 6;
+    if (x.sport === "bike" && x.km > 0){ const v = x.km / h; met = v < 16 ? 4 : v < 19 ? 6.8 : v < 22.5 ? 8 : v < 25.7 ? 10 : 12; }
+    if (x.sport === "swim" && x.km > 0){ const p = x.sec / (x.km * 10); met = p < 120 ? 9.8 : p < 150 ? 8.3 : p < 180 ? 7 : 5.8; }
+    kc = met * kgB * h;
+  }
+  return Math.round(kc / 5) * 5;
+}
+function isLift(t){ return t === "push" || t === "pull" || t === "legs"; }
+function gymMinutes(e){ return e.types.some(t => isLift(t) || t === "core") ? (e.min || 60) : 0; }
+function gymKcal(e){
+  const m = gymMinutes(e); if (!m) return 0;
+  const met = e.types.some(isLift) ? 5 : 3.8;                            // weight training vs. core only
+  return Math.round(met * bodyKgOn(e.date || iso(new Date())) * m / 60 / 5) * 5;
+}
+function dayCardioKcal(date){ return (lifts.__cardio || []).filter(c => c.date === date).reduce((a, c) => a + cardioKcal(c), 0); }
+function fmtK(n){ return Math.round(n).toLocaleString("en-US"); }
+function kcalChip(n){
+  return `<span class="kcal"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22c4.2 0 7-2.9 7-6.9 0-3.4-2.2-5.8-3.9-7.9-.5 1.8-1.4 2.9-2.6 3.4.3-3.1-1-5.9-3.4-8.6.1 3.3-1.6 5.4-3.2 7.5C4.7 11.1 4 12.7 4 15.1 4 19.1 7.6 22 12 22z"/></svg>≈ ${fmtK(n)} kcal</span>`;
+}
+
+/* ---- workout time on the Log a session card ---- */
+let gymMin = (() => { try { return Math.min(300, Math.max(5, parseInt(localStorage.getItem("gymlog.gymmin")) || 60)); } catch(e){ return 60; } })();
+function updateGymTime(){
+  try {
+    const box = document.getElementById("gymTime");
+    const gym = picked.some(t => isLift(t) || t === "core");
+    box.hidden = !gym;
+    if (!gym) return;
+    document.getElementById("gtVal").textContent = gymMin;
+    document.getElementById("gtK").innerHTML = kcalChip(gymKcal({ types: picked, min: gymMin, date: dateInput.value }));
+  } catch(e){}
+}
+document.querySelectorAll("[data-gt]").forEach(b => b.addEventListener("click", () => {
+  gymMin = Math.min(300, Math.max(5, gymMin + 5 * Number(b.dataset.gt)));
+  try { localStorage.setItem("gymlog.gymmin", gymMin); } catch(e){}
+  const v = document.getElementById("gtVal"); v.classList.remove("bump"); void v.offsetWidth; v.classList.add("bump");
+  updateGymTime();
+}));
 
 /* ================= sync to GitHub ================= */
 // Everything is saved to data.json in this repository:
@@ -2223,7 +2566,8 @@ const dec = b64 => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\n
 function rerender(){
   render();
   if (currentDetail) openDetail(currentDetail);
-  else if (tab === "weights") renderExercises();
+  else if (pickerG) renderPicker();
+  else if (tab === "weights" && !(wEditing && document.activeElement && document.activeElement.classList.contains("ename"))) renderExercises();
   else if (tab === "body") renderBody();
   else if (tab === "sleep") renderSleep();
   else if (currentCardio) openCardio(currentCardio);
@@ -2235,7 +2579,7 @@ function merge(a, b){
   const L = {};
   for (const src of [a.lifts||{}, b.lifts||{}]) for (const k in src){
     const m = new Map((L[k]||[]).map(x => [x.id, x]));
-    src[k].forEach(x => m.set(x.id, x));
+    src[k].forEach(x => { const o = m.get(x.id); if (!(o && o.t && x.t && o.t > x.t)) m.set(x.id, x); });   // newer settings win
     L[k] = [...m.values()];
   }
   const B = {};
