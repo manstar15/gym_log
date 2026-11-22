@@ -644,6 +644,13 @@ main{position:relative;z-index:0;isolation:isolate}
 .eq svg{width:28px;height:28px}
 .eq[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--bg))}
 .cprev{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.swakeat{display:flex;align-items:center;gap:12px;max-width:320px;margin:0 auto 10px;padding:10px 16px 10px 12px;border-radius:18px;text-align:left;
+  background:color-mix(in srgb,var(--sleep) 14%,var(--bg));border:1px solid color-mix(in srgb,var(--sleep) 30%,transparent)}
+.swa-ic{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--sleep) 25%,transparent);color:var(--sleep)}
+.swa-ic svg{width:22px;height:22px}
+.swa-txt{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+.swa-txt small{color:var(--muted);font-size:.8rem}
+.swa-txt b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:2rem;line-height:1.05;color:var(--sleep);font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -790,6 +797,10 @@ main{position:relative;z-index:0;isolation:isolate}
         <b id="sBigT">Start sleep</b>
         <small id="sBigS">Tap when you go to bed</small>
       </button>
+      <div class="swakeat" id="sWakeAt">
+        <span class="swa-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.2 2.2M4.5 4.5l3 -2.2M19.5 4.5l-3-2.2M6.5 19.5L5 21.5M17.5 19.5L19 21.5"/></svg></span>
+        <span class="swa-txt"><small id="sWakeLbl">Go to sleep now and wake up at</small><b id="sWakeTime">--:--</b><small id="sWakeSub">to get 8 hours of sleep</small></span>
+      </div>
       <p class="slabel" id="sBigMsg"></p>
       <div class="sbig-links">
         <button class="undo" id="sCancel" hidden>Cancel this sleep</button>
@@ -1963,6 +1974,13 @@ function renderBig(){
   }
   bigState = !!a;
   btn.classList.toggle("on", !!a);
+  // when to wake up for 8 hours
+  {
+    const base = a ? new Date(a.start) : new Date(), w = new Date(base.getTime() + SLEEP_GOAL * 60000);
+    document.getElementById("sWakeLbl").textContent = a ? "You’ll reach 8 hours at" : "Go to sleep now and wake up at";
+    document.getElementById("sWakeTime").textContent = tstr(w.getHours() * 60 + w.getMinutes());
+    document.getElementById("sWakeSub").textContent = a ? "Set your alarm for this time" : "to get 8 hours of sleep";
+  }
   document.getElementById("sCancel").hidden = !a;
   if (a){
     const st = new Date(a.start), mins = Math.max(0, Math.floor((Date.now() - st) / 60000));
@@ -2026,7 +2044,7 @@ document.getElementById("sManualBtn").addEventListener("click", () => {
   document.getElementById("sManualBtn").textContent = f.hidden ? "Add or fix a night by hand" : "Hide";
   if (!f.hidden){ fillSleepForm(); f.scrollIntoView({ behavior: "smooth", block: "start" }); }
 });
-setInterval(() => { if (tab === "sleep" && document.visibilityState === "visible" && sActive()) renderBig(); }, 20000);
+setInterval(() => { if (tab === "sleep" && document.visibilityState === "visible") renderBig(); }, 20000);
 document.addEventListener("visibilitychange", () => { if (tab === "sleep" && document.visibilityState === "visible") renderBig(); });
 
 const SLEEP_GOAL = 480;                        // 8 hours, in minutes
